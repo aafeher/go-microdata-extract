@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test 34 W3C Microdata extended</title>
+</head>
+<body>
+<div itemscope itemtype="https://schema.org/SoftwareApplication">
+    <span itemprop="name">Angry Birds</span> - REQUIRES
+    <span itemprop="operatingSystem">ANDROID</span><br/>
+    <span>
+        <a href="/download" title="download" itemprop="downloadUrl">/download</a>
+    </span>
+    <link itemprop="applicationCategory" href="https://schema.org/SoftwareApplication"/>
+    <div itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+        RATING:
+        <span itemprop="ratingValue">4.6</span> (
+        <span itemprop="ratingCount">8864</span> ratings )
+    </div>
+
+    <div itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+        Price: $<span itemprop="price">1.00</span>
+        <meta itemprop="priceCurrency" content="USD"/>
+    </div>
+</div>
+</body>
+</html>
