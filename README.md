@@ -1,5 +1,7 @@
 # go-microdata-extract
 
+[![codecov](https://codecov.io/gh/aafeher/go-microdata-extract/graph/badge.svg?token=BD1QYCZESR)](https://codecov.io/gh/aafeher/go-microdata-extract)
+
 A Go package for extracting structured data from HTML.
 
 ## Formats supported
