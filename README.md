@@ -1,6 +1,7 @@
 # go-microdata-extract
 
 [![codecov](https://codecov.io/gh/aafeher/go-microdata-extract/graph/badge.svg?token=BD1QYCZESR)](https://codecov.io/gh/aafeher/go-microdata-extract)
+[![Go](https://github.com/aafeher/go-microdata-extract/actions/workflows/go.yml/badge.svg)](https://github.com/aafeher/go-microdata-extract/actions/workflows/go.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/aafeher/go-microdata-extract.svg)](https://pkg.go.dev/github.com/aafeher/go-microdata-extract)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aafeher/go-microdata-extract)](https://goreportcard.com/report/github.com/aafeher/go-microdata-extract)
 
