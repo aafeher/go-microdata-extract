@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/aafeher/go-microdata-extract/extractors"
+	extractor "github.com/aafeher/go-microdata-extract/extractors"
 	"io"
 	"net/http"
 	"sync"
@@ -136,7 +136,7 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 		processors = append(processors, Processor{
 			Name: SyntaxOpenGraph,
 			Func: func() (interface{}, []error) {
-				return extract.ParseOpenGraph(e.url, e.content)
+				return extractor.ParseOpenGraph(e.url, e.content)
 			},
 		})
 	}
@@ -144,7 +144,7 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 		processors = append(processors, Processor{
 			Name: SyntaxXCards,
 			Func: func() (interface{}, []error) {
-				return extract.ParseXCards(e.url, e.content)
+				return extractor.ParseXCards(e.url, e.content)
 			},
 		})
 	}
@@ -152,7 +152,7 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 		processors = append(processors, Processor{
 			Name: SyntaxJSONLD,
 			Func: func() (interface{}, []error) {
-				return extract.JSONLD(e.url, e.content)
+				return extractor.JSONLD(e.url, e.content)
 			},
 		})
 	}
@@ -160,7 +160,7 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 		processors = append(processors, Processor{
 			Name: SyntaxMicrodata,
 			Func: func() (interface{}, []error) {
-				return extract.W3CMicrodata(e.url, e.content)
+				return extractor.W3CMicrodata(e.url, e.content)
 			},
 		})
 	}
