@@ -15,7 +15,7 @@ For currently supported formats, see [Statistics](#statistics)
 
 Usage statistics of structured data formats for websites
 
-(from https://w3techs.com/technologies/overview/structured_data, 2024-10-31)
+(from https://w3techs.com/technologies/overview/structured_data, 2024-11-24)
 
 
 | Format                                                                                 | Usage | Supported |
