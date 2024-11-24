@@ -19,13 +19,13 @@ Usage statistics of structured data formats for websites
 
 
 | Format                                                                                 | Usage | Supported |
-| -------------------------------------------------------------------------------------- | ----- | :-------: |
-| None                                                                                   | 23.7% |          |
-| [OpenGraph](https://ogp.me/)                                                           | 67.2% |    ✔    |
-| [X Cards](https://developer.x.com/en/docs/x-for-websites/cards/guides/getting-started) | 51.9% |    ✔    |
-| [JSON-LD](https://www.w3.org/TR/json-ld/)                                              | 49.3% |    ✔    |
-| [RDFa](https://www.w3.org/TR/rdfa-primer/)                                             | 39.3% |     -     |
-| [Microdata](https://html.spec.whatwg.org/multipage/microdata.html)                     | 24.2% |    ✔    |
+| -------------------------------------------------------------------------------------- |-------| :-------: |
+| None                                                                                   | 23.5% |          |
+| [OpenGraph](https://ogp.me/)                                                           | 67.4% |    ✔    |
+| [X Cards](https://developer.x.com/en/docs/x-for-websites/cards/guides/getting-started) | 52.2% |    ✔    |
+| [JSON-LD](https://www.w3.org/TR/json-ld/)                                              | 49.5% |    ✔    |
+| [RDFa](https://www.w3.org/TR/rdfa-primer/)                                             | 39.4% |     -     |
+| [Microdata](https://html.spec.whatwg.org/multipage/microdata.html)                     | 24.1% |    ✔    |
 | [Dublin Core](https://www.dublincore.org/specifications/dublin-core/dc-html/)          | 0.9%  |     -     |
 | [Microformats](https://microformats.org/wiki/Main_Page)                                | 0.4%  |     -     |
 
