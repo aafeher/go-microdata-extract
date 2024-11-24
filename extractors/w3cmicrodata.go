@@ -8,9 +8,9 @@ import (
 )
 
 type MicrodataItem struct {
-	Type       string                 `json:"type,omitempty"`
-	ID         *string                `json:"id,omitempty"`
-	Properties map[string]interface{} `json:"properties,omitempty"`
+	Type       string         `json:"type,omitempty"`
+	ID         *string        `json:"id,omitempty"`
+	Properties map[string]any `json:"properties,omitempty"`
 }
 
 func W3CMicrodata(URL string, htmlContent string) ([]MicrodataItem, []error) {
@@ -44,7 +44,7 @@ func parseW3CMicrodata(URL string, input string) ([]*MicrodataItem, []error) {
 	parseNode = func(n *html.Node) {
 		if n.Type == html.ElementNode && getAttr(n, "itemscope") {
 			item := &MicrodataItem{
-				Properties: make(map[string]interface{}),
+				Properties: make(map[string]any),
 			}
 			itemType := getAttrVal(n, "itemtype")
 			if itemType != "" {
@@ -74,7 +74,7 @@ func parseProperties(n *html.Node, item *MicrodataItem, URL string) {
 			if prop := getAttrVal(c, "itemprop"); prop != "" {
 				if getAttr(c, "itemscope") {
 					subItem := &MicrodataItem{
-						Properties: make(map[string]interface{}),
+						Properties: make(map[string]any),
 					}
 					subItemType := getAttrVal(c, "itemtype")
 					if subItemType != "" {
@@ -130,15 +130,15 @@ func getAttrVal(n *html.Node, key string) string {
 	return ""
 }
 
-func appendValue(existing interface{}, value interface{}) interface{} {
+func appendValue(existing any, value any) any {
 	if existing == nil {
 		return value
 	}
 	switch v := existing.(type) {
-	case []interface{}:
+	case []any:
 		return append(v, value)
 	default:
-		return []interface{}{existing, value}
+		return []any{existing, value}
 	}
 }
 

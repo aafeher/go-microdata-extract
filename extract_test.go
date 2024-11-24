@@ -146,7 +146,7 @@ func TestExtractor_Extract(t *testing.T) {
 		url       string
 		content   *string
 		err       *string
-		extracted map[Syntax]interface{}
+		extracted map[Syntax]any
 		errs      []error
 	}{
 		{
@@ -154,7 +154,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:       server.URL,
 			content:   nil,
 			err:       pointerOfString("received HTTP status 404"),
-			extracted: map[Syntax]interface{}{},
+			extracted: map[Syntax]any{},
 			errs:      []error{errors.New("received HTTP status 404")},
 		},
 		{
@@ -162,10 +162,10 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     server.URL,
 			content: pointerOfString("<html>error</p></html>"),
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -175,7 +175,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-01-opengraph-minimal.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:  "website",
 					Title: "go-microdata-extract",
@@ -186,7 +186,7 @@ func TestExtractor_Extract(t *testing.T) {
 					Title: "go-microdata-extract",
 					URL:   "https://github.com/aafeher/go-microdata-extract",
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -196,7 +196,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-02-opengraph-optional.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:        `website`,
 					Title:       `go-microdata-extract`,
@@ -259,7 +259,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -269,7 +269,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-03-opengraph-image.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:        `website`,
 					Title:       `go-microdata-extract`,
@@ -308,7 +308,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -318,7 +318,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-04-opengraph-video.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:        `website`,
 					Title:       `go-microdata-extract`,
@@ -355,7 +355,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -365,7 +365,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-05-opengraph-audio.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:        `website`,
 					Title:       `go-microdata-extract`,
@@ -398,7 +398,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -408,7 +408,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-06-opengraph-music-song.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:     `music.song`,
 					Title:    `Under Pressure`,
@@ -451,7 +451,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -461,7 +461,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-07-opengraph-music-album.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:        `music.album`,
 					Title:       `Greatest Hits II`,
@@ -522,7 +522,7 @@ func TestExtractor_Extract(t *testing.T) {
 						ReleaseDate: "2011-04-19",
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -532,7 +532,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-08-opengraph-music-playlist.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:     `music.playlist`,
 					Title:    `on repeat`,
@@ -565,7 +565,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -575,7 +575,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-09-opengraph-video-movie.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:     `video.movie`,
 					Title:    `OpenGraph Video Movie Title`,
@@ -640,7 +640,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -650,7 +650,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-10-opengraph-video-episode.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:     `video.episode`,
 					Title:    `OpenGraph Video Episode Title`,
@@ -717,7 +717,7 @@ func TestExtractor_Extract(t *testing.T) {
 						Series: "Video Series",
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -727,7 +727,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-11-opengraph-article.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:     `article`,
 					Title:    `OpenGraph Article Title`,
@@ -768,7 +768,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -778,7 +778,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-12-opengraph-book.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:     `book`,
 					Title:    `OpenGraph Book Title`,
@@ -815,7 +815,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -825,7 +825,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-13-opengraph-profile.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:     `profile`,
 					Title:    `OpenGraph Profile Title`,
@@ -850,7 +850,7 @@ func TestExtractor_Extract(t *testing.T) {
 						Gender:    "male",
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -860,7 +860,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-14-opengraph-errors.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": &extract.OpenGraph{
 					Type:     `video.movie`,
 					Title:    `OpenGraph Errors Title`,
@@ -881,7 +881,7 @@ func TestExtractor_Extract(t *testing.T) {
 						ReleaseDate: time.Time{},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -891,7 +891,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-15-xcards-minimal.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Card:    "summary",
@@ -901,7 +901,7 @@ func TestExtractor_Extract(t *testing.T) {
 					Title:   `go-microdata-extract`,
 					URL:     `https://github.com/aafeher/go-microdata-extract`,
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -911,7 +911,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-16-xcards-optional.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Card:        "summary",
@@ -947,7 +947,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -957,7 +957,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-17-xcards-image.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:        `website`,
@@ -978,7 +978,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -988,7 +988,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-18-xcards-video.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:        `website`,
@@ -1008,7 +1008,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1018,7 +1018,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-19-xcards-audio.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:        `website`,
@@ -1036,7 +1036,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1046,7 +1046,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-20-xcards-music-song.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:     `music.song`,
@@ -1069,7 +1069,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1079,7 +1079,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-21-xcards-music-album.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:        `music.album`,
@@ -1111,7 +1111,7 @@ func TestExtractor_Extract(t *testing.T) {
 						ReleaseDate: "2011-04-19",
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1121,7 +1121,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-22-xcards-music-playlist.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:     `music.playlist`,
@@ -1139,7 +1139,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1149,7 +1149,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-23-xcards-video-movie.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:     `video.movie`,
@@ -1183,7 +1183,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1193,7 +1193,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-24-xcards-video-episode.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:     `video.episode`,
@@ -1228,7 +1228,7 @@ func TestExtractor_Extract(t *testing.T) {
 						Series: "Video Series",
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1238,7 +1238,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-25-xcards-article.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:     `article`,
@@ -1260,7 +1260,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1270,7 +1270,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-26-xcards-book.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:     `book`,
@@ -1290,7 +1290,7 @@ func TestExtractor_Extract(t *testing.T) {
 						},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1300,7 +1300,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-27-xcards-profile.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:     `profile`,
@@ -1314,7 +1314,7 @@ func TestExtractor_Extract(t *testing.T) {
 						Gender:    "male",
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1324,7 +1324,7 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-28-xcards-errors.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards": &extract.XCards{
 					Type:     `video.movie`,
@@ -1336,7 +1336,7 @@ func TestExtractor_Extract(t *testing.T) {
 						ReleaseDate: time.Time{},
 					},
 				},
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: nil,
@@ -1346,13 +1346,13 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-29-ldjson-object.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld": []map[string]interface{}{
+				"json-ld": []map[string]any{
 					{
 						"@context": "https://schema.org",
-						"address": map[string]interface{}{
+						"address": map[string]any{
 							"@type":           "PostalAddress",
 							"addressLocality": "Colorado Springs",
 							"addressRegion":   "CO",
@@ -1373,11 +1373,11 @@ func TestExtractor_Extract(t *testing.T) {
 						"telephone":   "(123) 456-6789",
 						"url":         "http://www.example.com",
 						"@type":       "Person",
-						"colleague": []interface{}{
+						"colleague": []any{
 							"http://www.example.com/JohnColleague.html",
 							"http://www.example.com/JameColleague.html",
 						},
-						"sameAs": []interface{}{
+						"sameAs": []any{
 							"https://www.facebook.com/",
 							"https://www.linkedin.com/",
 							"http://twitter.com/",
@@ -1395,13 +1395,13 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-30-ldjson-array.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld": []map[string]interface{}{
+				"json-ld": []map[string]any{
 					{
 						"@context": "https://schema.org",
-						"address": map[string]interface{}{
+						"address": map[string]any{
 							"@type":           "PostalAddress",
 							"addressLocality": "Colorado Springs",
 							"addressRegion":   "CO",
@@ -1422,11 +1422,11 @@ func TestExtractor_Extract(t *testing.T) {
 						"telephone":   "(123) 456-6789",
 						"url":         "http://www.example.com",
 						"@type":       "Person",
-						"colleague": []interface{}{
+						"colleague": []any{
 							"http://www.example.com/JohnColleague.html",
 							"http://www.example.com/JameColleague.html",
 						},
-						"sameAs": []interface{}{
+						"sameAs": []any{
 							"https://www.facebook.com/",
 							"https://www.linkedin.com/",
 							"http://twitter.com/",
@@ -1444,10 +1444,10 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-31-ldjson-multiple-objects.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld": []map[string]interface{}{
+				"json-ld": []map[string]any{
 					{
 						"@context": "https://schema.org",
 						"name":     "John Doe",
@@ -1468,15 +1468,15 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-32-ldjson-errors.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem(nil),
 			},
 			errs: []error{
 				func() error {
-					var jsonData []map[string]interface{}
+					var jsonData []map[string]any
 					jsonLD := `[
         {
             "@context": "https://schema.org",
@@ -1490,7 +1490,7 @@ func TestExtractor_Extract(t *testing.T) {
 					return nil
 				}(),
 				func() error {
-					var jsonData []map[string]interface{}
+					var jsonData []map[string]any
 					jsonLD := `{
         "@context": "https://schema.org",
         "@type": "Person",
@@ -1508,21 +1508,21 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-33-w3cmicrodata-simple.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem{
 					{
 						Type: "https://schema.org/SoftwareApplication",
-						Properties: map[string]interface{}{
+						Properties: map[string]any{
 							"name":                "Angry Birds",
 							"operatingSystem":     "ANDROID",
 							"applicationCategory": "",
 							"aggregateRating": &extract.MicrodataItem{
 								Type: "https://schema.org/AggregateRating",
 								ID:   nil,
-								Properties: map[string]interface{}{
+								Properties: map[string]any{
 									"ratingValue": "4.6",
 									"ratingCount": "8864",
 								},
@@ -1530,7 +1530,7 @@ func TestExtractor_Extract(t *testing.T) {
 							"offers": &extract.MicrodataItem{
 								Type: "https://schema.org/Offer",
 								ID:   nil,
-								Properties: map[string]interface{}{
+								Properties: map[string]any{
 									"price":         "1.00",
 									"priceCurrency": "",
 								},
@@ -1546,14 +1546,14 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-34-w3cmicrodata-extended.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem{
 					{
 						Type: "https://schema.org/SoftwareApplication",
-						Properties: map[string]interface{}{
+						Properties: map[string]any{
 							"name":                "Angry Birds",
 							"operatingSystem":     "ANDROID",
 							"downloadUrl":         fmt.Sprintf("%s/download", server.URL),
@@ -1561,7 +1561,7 @@ func TestExtractor_Extract(t *testing.T) {
 							"aggregateRating": &extract.MicrodataItem{
 								Type: "https://schema.org/AggregateRating",
 								ID:   nil,
-								Properties: map[string]interface{}{
+								Properties: map[string]any{
 									"ratingValue": "4.6",
 									"ratingCount": "8864",
 								},
@@ -1569,7 +1569,7 @@ func TestExtractor_Extract(t *testing.T) {
 							"offers": &extract.MicrodataItem{
 								Type: "https://schema.org/Offer",
 								ID:   nil,
-								Properties: map[string]interface{}{
+								Properties: map[string]any{
 									"price":         "1.00",
 									"priceCurrency": "",
 								},
@@ -1585,14 +1585,14 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-35-w3cmicrodata-book.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem{
 					{
 						ID: pointerOfString("urn:isbn:0-374-22848-5\u003c"),
-						Properties: map[string]interface{}{
+						Properties: map[string]any{
 							"author":        "Jonathan C Slaght",
 							"datePublished": "2020-08-04",
 							"title":         "Owls of the Eastern Ice",
@@ -1609,18 +1609,18 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-36-w3cmicrodata-organization.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem{
 					{
 						ID: pointerOfString("http://example.com/org/1"),
-						Properties: map[string]interface{}{
+						Properties: map[string]any{
 							"employee": &extract.MicrodataItem{
 								Type: "http://schema.org/Person",
 								ID:   pointerOfString("http://example.com/person/1"),
-								Properties: map[string]interface{}{
+								Properties: map[string]any{
 									"name": "John Doe",
 								},
 							},
@@ -1637,17 +1637,17 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-37-w3cmicrodata-product.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem{
 					{
 						Type: "http://schema.org/Product",
-						Properties: map[string]interface{}{
+						Properties: map[string]any{
 							"aggregateRating": &extract.MicrodataItem{
 								Type: "http://schema.org/AggregateRating",
-								Properties: map[string]interface{}{
+								Properties: map[string]any{
 									"ratingValue": "3.5",
 									"reviewCount": "11",
 								},
@@ -1665,18 +1665,18 @@ func TestExtractor_Extract(t *testing.T) {
 			url:     fmt.Sprintf("%s/test-38-w3cmicrodata-multiple-itemprop.html", server.URL),
 			content: nil,
 			err:     nil,
-			extracted: map[Syntax]interface{}{
+			extracted: map[Syntax]any{
 				"opengraph": nil,
 				"xcards":    nil,
-				"json-ld":   []map[string]interface{}(nil),
+				"json-ld":   []map[string]any(nil),
 				"microdata": []extract.MicrodataItem{
 					{
-						Properties: map[string]interface{}{
-							"flavor": []interface{}{
+						Properties: map[string]any{
+							"flavor": []any{
 								"Lemon sorbet",
 								"Apricot sorbet",
 							},
-							"color": []interface{}{
+							"color": []any{
 								"yellow",
 								"green",
 								"purple",
@@ -1850,19 +1850,19 @@ func TestExtractor_GetExtracted(t *testing.T) {
 	tests := []struct {
 		name  string
 		setup func() *Extractor
-		want  map[Syntax]interface{}
+		want  map[Syntax]any
 	}{
 		{
 			name: "extracted map initialized",
 			setup: func() *Extractor {
 				return &Extractor{
-					extracted: map[Syntax]interface{}{
+					extracted: map[Syntax]any{
 						"key1": "value1",
 						"key2": "value2",
 					},
 				}
 			},
-			want: map[Syntax]interface{}{
+			want: map[Syntax]any{
 				"key1": "value1",
 				"key2": "value2",
 			},
@@ -1896,7 +1896,7 @@ func TestExtractor_GetExtractedJSON(t *testing.T) {
 			name: "extracted map initialized",
 			setup: func() *Extractor {
 				tmp := &Extractor{
-					extracted: map[Syntax]interface{}{
+					extracted: map[Syntax]any{
 						"key1": "value1",
 						"key2": "value2",
 					},
@@ -1913,7 +1913,7 @@ func TestExtractor_GetExtractedJSON(t *testing.T) {
 			name: "empty extracted map",
 			setup: func() *Extractor {
 				tmp := &Extractor{
-					extracted: map[Syntax]interface{}{},
+					extracted: map[Syntax]any{},
 				}
 				return tmp
 			},
@@ -1932,7 +1932,7 @@ func TestExtractor_GetExtractedJSON(t *testing.T) {
 			name: "error",
 			setup: func() *Extractor {
 				return &Extractor{
-					extracted: map[Syntax]interface{}{
+					extracted: map[Syntax]any{
 						"key1": struct {
 							Channel chan int
 							Name    string

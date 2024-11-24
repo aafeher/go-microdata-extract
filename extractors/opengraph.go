@@ -132,11 +132,11 @@ func NewOpenGraph() *OpenGraph {
 	return &OpenGraph{}
 }
 
-func ParseOpenGraph(URL string, htmlContent string) (interface{}, []error) {
+func ParseOpenGraph(URL string, htmlContent string) (any, []error) {
 	_ = URL
 	item, errors := extractOpenGraph(htmlContent)
 
-	var results interface{}
+	var results any
 	if item != nil {
 		results = item
 	}

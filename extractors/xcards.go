@@ -81,7 +81,7 @@ func NewXCards() *XCards {
 	return &XCards{}
 }
 
-func ParseXCards(URL string, htmlContent string) (interface{}, []error) {
+func ParseXCards(URL string, htmlContent string) (any, []error) {
 	_ = URL
 	itemXCards, errorsXCards := extractXCards(htmlContent)
 
@@ -94,7 +94,7 @@ func ParseXCards(URL string, htmlContent string) (interface{}, []error) {
 		errorsXCards = append(errorsXCards, errorsFillMissing...)
 	}
 
-	var results interface{}
+	var results any
 	if itemXCards != nil {
 		results = itemXCards
 	}
@@ -372,7 +372,7 @@ func handleXCardsAudioProperty(xc *XCards, parts []string, content string) {
 }
 
 // fillMissingFieldsFromOpenGraph fills missing fields in the target struct with values from the source struct.
-func fillMissingFieldsFromOpenGraph(target, source interface{}) []error {
+func fillMissingFieldsFromOpenGraph(target, source any) []error {
 	var errors []error
 
 	// Check that both target and source are non-nil pointers to structs

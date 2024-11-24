@@ -17,7 +17,7 @@ type (
 		cfg       config
 		url       string
 		content   string
-		extracted map[Syntax]interface{}
+		extracted map[Syntax]any
 		errs      []error
 	}
 
@@ -31,7 +31,7 @@ type (
 	// Processor represents a data structure to hold a processor's name and function for extracting metadata.
 	Processor struct {
 		Name Syntax
-		Func func() (interface{}, []error)
+		Func func() (any, []error)
 	}
 
 	Syntax string
@@ -57,7 +57,7 @@ var SYNTAXES = []Syntax{SyntaxOpenGraph, SyntaxXCards, SyntaxJSONLD, SyntaxMicro
 // New creates a new instance of Extractor with default configurations and an empty map for extracted data.
 func New() *Extractor {
 	e := &Extractor{
-		extracted: make(map[Syntax]interface{}),
+		extracted: make(map[Syntax]any),
 	}
 
 	e.setConfigDefaults()
@@ -135,7 +135,7 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 	if contains(e.cfg.syntaxes, SyntaxOpenGraph) {
 		processors = append(processors, Processor{
 			Name: SyntaxOpenGraph,
-			Func: func() (interface{}, []error) {
+			Func: func() (any, []error) {
 				return extractor.ParseOpenGraph(e.url, e.content)
 			},
 		})
@@ -143,7 +143,7 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 	if contains(e.cfg.syntaxes, SyntaxXCards) {
 		processors = append(processors, Processor{
 			Name: SyntaxXCards,
-			Func: func() (interface{}, []error) {
+			Func: func() (any, []error) {
 				return extractor.ParseXCards(e.url, e.content)
 			},
 		})
@@ -151,7 +151,7 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 	if contains(e.cfg.syntaxes, SyntaxJSONLD) {
 		processors = append(processors, Processor{
 			Name: SyntaxJSONLD,
-			Func: func() (interface{}, []error) {
+			Func: func() (any, []error) {
 				return extractor.JSONLD(e.url, e.content)
 			},
 		})
@@ -159,7 +159,7 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 	if contains(e.cfg.syntaxes, SyntaxMicrodata) {
 		processors = append(processors, Processor{
 			Name: SyntaxMicrodata,
-			Func: func() (interface{}, []error) {
+			Func: func() (any, []error) {
 				return extractor.W3CMicrodata(e.url, e.content)
 			},
 		})
@@ -232,7 +232,7 @@ func (e *Extractor) fetch(url string) ([]byte, error) {
 }
 
 // GetExtracted returns the extracted metadata as a map by processor name from the Extractor instance.
-func (e *Extractor) GetExtracted() map[Syntax]interface{} {
+func (e *Extractor) GetExtracted() map[Syntax]any {
 	return e.extracted
 }
 
