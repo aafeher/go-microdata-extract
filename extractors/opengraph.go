@@ -333,8 +333,11 @@ func parseOpenGraphMetaTag(og *OpenGraph, property, content string) {
 }
 
 func handleOpenGraphImageProperty(og *OpenGraph, parts []string, content string) {
+	if len(og.OpenGraphImage) == 0 {
+		og.OpenGraphImage = []OpenGraphImage{}
+	}
 	if len(og.OpenGraphImage) == 0 || parts[1] == "image" {
-		if len(parts) < 3 {
+		if len(parts) < 3 || len(og.OpenGraphImage) == 0 {
 			og.OpenGraphImage = append(og.OpenGraphImage, OpenGraphImage{})
 		}
 	}
@@ -360,8 +363,11 @@ func handleOpenGraphImageProperty(og *OpenGraph, parts []string, content string)
 }
 
 func handleOpenGraphVideoProperty(og *OpenGraph, parts []string, content string) {
+	if len(og.OpenGraphVideo) == 0 {
+		og.OpenGraphVideo = []OpenGraphVideo{}
+	}
 	if len(og.OpenGraphVideo) == 0 || parts[1] == "video" {
-		if len(parts) < 3 {
+		if len(parts) < 3 || len(og.OpenGraphVideo) == 0 {
 			og.OpenGraphVideo = append(og.OpenGraphVideo, OpenGraphVideo{})
 		}
 	}
@@ -385,8 +391,11 @@ func handleOpenGraphVideoProperty(og *OpenGraph, parts []string, content string)
 }
 
 func handleOpenGraphAudioProperty(og *OpenGraph, parts []string, content string) {
+	if len(og.OpenGraphAudio) == 0 {
+		og.OpenGraphAudio = []OpenGraphAudio{}
+	}
 	if len(og.OpenGraphAudio) == 0 || parts[1] == "audio" {
-		if len(parts) < 3 {
+		if len(parts) < 3 || len(og.OpenGraphAudio) == 0 {
 			og.OpenGraphAudio = append(og.OpenGraphAudio, OpenGraphAudio{})
 		}
 	}
