@@ -88,7 +88,10 @@ func parseProperties(n *html.Node, item *MicrodataItem, URL string) {
 					item.Properties[prop] = appendValue(item.Properties[prop], subItem)
 				} else {
 					value := getTextContent(c)
-					if datetime := getAttrVal(c, "datetime"); datetime != "" {
+					attrContent := getAttrVal(c, "content")
+					if c.Data == "meta" && attrContent != "" {
+						value = attrContent
+					} else if datetime := getAttrVal(c, "datetime"); datetime != "" {
 						value = datetime
 					} else if prop == "url" || strings.HasSuffix(prop, "Url") {
 						href := getAttrVal(c, "href")

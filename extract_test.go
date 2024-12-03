@@ -1532,7 +1532,7 @@ func TestExtractor_Extract(t *testing.T) {
 								ID:   nil,
 								Properties: map[string]any{
 									"price":         "1.00",
-									"priceCurrency": "",
+									"priceCurrency": "USD",
 								},
 							},
 						},
@@ -1571,7 +1571,7 @@ func TestExtractor_Extract(t *testing.T) {
 								ID:   nil,
 								Properties: map[string]any{
 									"price":         "1.00",
-									"priceCurrency": "",
+									"priceCurrency": "USD",
 								},
 							},
 						},
