@@ -19,7 +19,7 @@ func JSONLD(URL string, htmlContent string) ([]map[string]any, []error) {
 }
 
 func extractJSONLD(htmlContent string) ([]map[string]any, []error) {
-	re := regexp.MustCompile(`(?s)<script[^>]+type=["']application/ld\+json["'][^>]*>(.*?)</script>`)
+	re := regexp.MustCompile(`(?s)<script[^>]+type[ \t\n]*=[ \t\n]*["']application/ld\+json["'][^>]*>(.*?)</script>`)
 
 	matches := re.FindAllStringSubmatch(htmlContent, -1)
 
