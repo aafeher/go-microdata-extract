@@ -306,6 +306,11 @@ func handleXCardsImageProperty(xc *XCards, parts []string, content string) {
 	}
 	lastIdx := len(xc.XCardsImage) - 1
 
+	if lastIdx < 0 {
+		xc.XCardsImage = append(xc.XCardsImage, XCardsImage{})
+		lastIdx = 0
+	}
+
 	if len(parts) == 2 {
 		xc.XCardsImage[lastIdx].URL = content
 		return

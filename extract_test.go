@@ -966,6 +966,10 @@ func TestExtractor_Extract(t *testing.T) {
 					Description: `X Cards with image`,
 					XCardsImage: []extract.XCardsImage{
 						{
+							URL:   "",
+							Width: 1200,
+						},
+						{
 							URL: "https://picsum.photos/200/300",
 						},
 						{
