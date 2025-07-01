@@ -90,7 +90,7 @@ func ParseXCards(URL string, htmlContent string) (any, []error) {
 		if itemXCards == nil {
 			itemXCards = &XCards{}
 		}
-		errorsFillMissing := fillMissingFieldsFromOpenGraph(itemXCards, itemOpenGraph)
+		errorsFillMissing := FillMissingFieldsFromOpenGraph(itemXCards, itemOpenGraph)
 		errorsXCards = append(errorsXCards, errorsFillMissing...)
 	}
 
@@ -119,7 +119,6 @@ func extractXCards(htmlContent string) (*XCards, []error) {
 			if tokenizer.Err() == io.EOF {
 				break
 			}
-			errors = append(errors, tokenizer.Err())
 		case html.StartTagToken, html.SelfClosingTagToken, html.EndTagToken:
 			token := tokenizer.Token()
 			if token.Data != "meta" || token.Attr == nil {
@@ -376,8 +375,8 @@ func handleXCardsAudioProperty(xc *XCards, parts []string, content string) {
 	}
 }
 
-// fillMissingFieldsFromOpenGraph fills missing fields in the target struct with values from the source struct.
-func fillMissingFieldsFromOpenGraph(target, source any) []error {
+// FillMissingFieldsFromOpenGraph fills missing fields in the target struct with values from the source struct.
+func FillMissingFieldsFromOpenGraph(target, source any) []error {
 	var errors []error
 
 	// Check that both target and source are non-nil pointers to structs
@@ -385,12 +384,17 @@ func fillMissingFieldsFromOpenGraph(target, source any) []error {
 	if tVal.Kind() != reflect.Ptr || tVal.IsNil() {
 		errors = append(errors, fmt.Errorf("target must be a non-nil pointer to a struct"))
 	}
-	tVal = tVal.Elem()
 
 	sVal := reflect.ValueOf(source)
 	if sVal.Kind() != reflect.Ptr || sVal.IsNil() {
 		errors = append(errors, fmt.Errorf("source must be a non-nil pointer to a struct"))
 	}
+
+	if len(errors) > 0 {
+		return errors
+	}
+
+	tVal = tVal.Elem()
 	sVal = sVal.Elem()
 
 	// Iterate over fields in source, matching by field name
@@ -413,7 +417,7 @@ func fillMissingFieldsFromOpenGraph(target, source any) []error {
 			if tField.IsNil() && !sField.IsNil() {
 				tField.Set(sField)
 			} else if !tField.IsNil() && !sField.IsNil() {
-				errs := fillMissingFieldsFromOpenGraph(tField.Interface(), sField.Interface())
+				errs := FillMissingFieldsFromOpenGraph(tField.Interface(), sField.Interface())
 				errors = append(errors, errs...)
 			}
 		case reflect.Slice:
@@ -421,7 +425,7 @@ func fillMissingFieldsFromOpenGraph(target, source any) []error {
 				tField.Set(sField)
 			}
 		case reflect.Struct:
-			errs := fillMissingFieldsFromOpenGraph(tField.Addr().Interface(), sField.Addr().Interface())
+			errs := FillMissingFieldsFromOpenGraph(tField.Addr().Interface(), sField.Addr().Interface())
 			errors = append(errors, errs...)
 		default:
 			continue

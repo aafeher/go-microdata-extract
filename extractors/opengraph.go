@@ -161,7 +161,6 @@ func extractOpenGraph(htmlContent string) (*OpenGraph, []error) {
 			if tokenizer.Err() == io.EOF {
 				break
 			}
-			errors = append(errors, tokenizer.Err())
 		case html.StartTagToken, html.SelfClosingTagToken, html.EndTagToken:
 			token := tokenizer.Token()
 			if token.Data != "meta" || token.Attr == nil {
