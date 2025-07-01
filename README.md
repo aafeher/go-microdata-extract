@@ -15,17 +15,17 @@ For currently supported formats, see [Statistics](#statistics)
 
 Usage statistics of structured data formats for websites
 
-(from https://w3techs.com/technologies/overview/structured_data, 2025-02-02)
+(from https://w3techs.com/technologies/overview/structured_data, 2025-07-01)
 
 
 | Format                                                                                 | Usage | Supported |
 | -------------------------------------------------------------------------------------- |-------| :-------: |
-| None                                                                                   | 23.2% |          |
-| [OpenGraph](https://ogp.me/)                                                           | 67.8% |    ✔    |
-| [X Cards](https://developer.x.com/en/docs/x-for-websites/cards/guides/getting-started) | 52.6% |    ✔    |
-| [JSON-LD](https://www.w3.org/TR/json-ld/)                                              | 49.9% |    ✔    |
-| [RDFa](https://www.w3.org/TR/rdfa-primer/)                                             | 39.3% |     -     |
-| [Microdata](https://html.spec.whatwg.org/multipage/microdata.html)                     | 24.0% |    ✔    |
+| None                                                                                   | 22.5% |          |
+| [OpenGraph](https://ogp.me/)                                                           | 68.7% |    ✔    |
+| [X Cards](https://developer.x.com/en/docs/x-for-websites/cards/guides/getting-started) | 53.8% |    ✔    |
+| [JSON-LD](https://www.w3.org/TR/json-ld/)                                              | 51.0% |    ✔    |
+| [RDFa](https://www.w3.org/TR/rdfa-primer/)                                             | 39.4% |     -     |
+| [Microdata](https://html.spec.whatwg.org/multipage/microdata.html)                     | 23.6% |    ✔    |
 | [Dublin Core](https://www.dublincore.org/specifications/dublin-core/dc-html/)          | 0.9%  |     -     |
 | [Microformats](https://microformats.org/wiki/Main_Page)                                | 0.4%  |     -     |
 
