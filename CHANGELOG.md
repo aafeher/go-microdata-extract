@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Bump minimum Go version from 1.18 to 1.25.0
 - Update dependency `golang.org/x/net` from v0.31.0 to v0.53.0
+- Update GitHub Actions workflow Go version from 1.18 to 1.25.0
 
 ### Fixed
 - Replace unreachable `len(errs) < 0` condition with correct `len(errs) != 0` check in `extract_test.go`
