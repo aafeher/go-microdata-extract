@@ -7,8 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-05
+
+### Added
+- Add example: raw HTML content provided directly without HTTP fetch (`examples/rawcontent`)
+- Add example: error handling for fetch failures and missing syntax data (`examples/errorhandling`)
+- Add example: JSON-LD extraction with type assertion and nested field access (`examples/getjsonld`)
+- Add example: W3C Microdata extraction with type assertion and nested items (`examples/getmicrodata`)
+
+## [0.2.0] - 2026-05-05
+
 ### Added
 - `CHANGELOG.md` file with full history from v0.1.0 to v0.1.7
+- `ROADMAP.md` progress tracker with planned versions up to v1.0.0
 - `codecov.yml` configuration file for Codecov
 - `.golangci.yml` linter configuration (errcheck, govet, staticcheck, ineffassign, misspell, unused, gosimple, revive)
 - Add 100% coverage threshold to `codecov.yml` for both project and patch checks
@@ -83,7 +94,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for providing raw HTML content directly (bypassing HTTP fetch)
 - Examples: simple extraction, OpenGraph-only, configuring specific syntaxes
 
-[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.1.7...HEAD
+[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.1.7...v0.2.0
 [0.1.7]: https://github.com/aafeher/go-microdata-extract/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/aafeher/go-microdata-extract/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/aafeher/go-microdata-extract/compare/v0.1.4...v0.1.5
