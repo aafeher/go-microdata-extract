@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump minimum Go version from 1.18 to 1.25.0
 - Update dependency `golang.org/x/net` from v0.31.0 to v0.53.0
 
+### Fixed
+- Replace unreachable `len(errs) < 0` condition with correct `len(errs) != 0` check in `extract_test.go`
+- Rename unused `r *http.Request` parameter to `_` in test HTTP handler (`extract_test.go`)
+
 ## [0.1.7] - 2025-07-01
 
 ### Changed

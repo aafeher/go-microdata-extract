@@ -1863,7 +1863,7 @@ func TestExtractor_fetch_NewRequestError(t *testing.T) {
 }
 
 func TestExtractor_fetch_IOCopyError(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		for i := 0; i < 1000; i++ {
 			_, err := w.Write([]byte("Some content that will be interrupted"))
@@ -2413,8 +2413,8 @@ func TestFillMissingFieldsFromOpenGraph_RecursiveErrorPropagation(t *testing.T) 
 
 	// This test mainly ensures that the recursive call path works correctly
 	// and that no panics occur during the process
-	if len(errs) < 0 { // Just checking that errs slice is properly initialized
-		t.Errorf("unexpected error slice state")
+	if len(errs) != 0 {
+		t.Errorf("unexpected errors: %v", errs)
 	}
 
 	// Verify the actual filling worked correctly
