@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `CHANGELOG.md` file with full history from v0.1.0 to v0.1.7
 - `codecov.yml` configuration file for Codecov
+- `.golangci.yml` linter configuration (errcheck, govet, staticcheck, ineffassign, misspell, unused, gosimple, revive)
 
 ### Changed
 - Bump minimum Go version from 1.18 to 1.25.0
