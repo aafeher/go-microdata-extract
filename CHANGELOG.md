@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-05
+
+### Added
+- RDFa extractor (`extractors/rdfa.go`) supporting `vocab`, `typeof`, `property`, `prefix`, `resource`, `about` attributes and CURIE resolution
+- `SyntaxRDFa` constant (`"rdfa"`) added to `SYNTAXES` and enabled by default
+- Add example: RDFa extraction with type assertion and nested items (`examples/getrdfa`)
+
+### Changed
+- Default syntaxes list extended with `SyntaxRDFa`
+- README: RDFa marked as supported in the formats table, default syntaxes updated
+
 ## [0.3.0] - 2026-05-05
 
 ### Added
@@ -94,7 +105,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for providing raw HTML content directly (bypassing HTTP fetch)
 - Examples: simple extraction, OpenGraph-only, configuring specific syntaxes
 
-[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.1.7...v0.2.0
 [0.1.7]: https://github.com/aafeher/go-microdata-extract/compare/v0.1.6...v0.1.7

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>RDFa Basic</title></head>
+<body>
+<div vocab="https://schema.org/" typeof="Person">
+  <div class="wrapper">
+    <span property="name">Jane Doe</span>
+  </div>
+  <span property="birthDate" content="1979-01-01">January 1979</span>
+  <time property="deathDate" datetime="2050-01-01">January 1, 2050</time>
+  <a property="url" href="https://example.com/janedoe">Homepage</a>
+  <img property="image" src="https://example.com/janedoe.jpg" alt="Jane" />
+  <span property="sameAs" resource="https://dbpedia.org/page/Jane_Doe">DBpedia</span>
+  <span vocab="https://schema.org/" property="jobTitle">Engineer</span>
+</div>
+</body>
+</html>

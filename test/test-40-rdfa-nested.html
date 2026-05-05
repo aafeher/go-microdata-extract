@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>RDFa Nested</title></head>
+<body>
+<div vocab="https://schema.org/" typeof="Person" about="https://example.com/person/1">
+  <span property="name">Jane Doe</span>
+  <div property="address" typeof="PostalAddress">
+    <span property="streetAddress">123 Main St</span>
+    <span property="addressLocality">Springfield</span>
+  </div>
+</div>
+</body>
+</html>

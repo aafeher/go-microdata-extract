@@ -49,10 +49,13 @@ const (
 
 	// SyntaxMicrodata is the identifier used for the W3C Microdata metadata syntax.
 	SyntaxMicrodata Syntax = "microdata"
+
+	// SyntaxRDFa is the identifier used for the RDFa metadata syntax.
+	SyntaxRDFa Syntax = "rdfa"
 )
 
 // SYNTAXES defines an array of metadata syntax identifiers supported for parsing.
-var SYNTAXES = []Syntax{SyntaxOpenGraph, SyntaxXCards, SyntaxJSONLD, SyntaxMicrodata}
+var SYNTAXES = []Syntax{SyntaxOpenGraph, SyntaxXCards, SyntaxJSONLD, SyntaxMicrodata, SyntaxRDFa}
 
 // New creates a new instance of Extractor with default configurations and an empty map for extracted data.
 func New() *Extractor {
@@ -161,6 +164,14 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 			Name: SyntaxMicrodata,
 			Func: func() (any, []error) {
 				return extractor.W3CMicrodata(e.url, e.content)
+			},
+		})
+	}
+	if contains(e.cfg.syntaxes, SyntaxRDFa) {
+		processors = append(processors, Processor{
+			Name: SyntaxRDFa,
+			Func: func() (any, []error) {
+				return extractor.RDFa(e.url, e.content)
 			},
 		})
 	}
