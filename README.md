@@ -15,19 +15,19 @@ For currently supported formats, see [Statistics](#statistics)
 
 Usage statistics of structured data formats for websites
 
-(from https://w3techs.com/technologies/overview/structured_data, 2025-07-01)
+(from https://w3techs.com/technologies/overview/structured_data, 2026-05-05)
 
 
 | Format                                                                                 | Usage | Supported |
-| -------------------------------------------------------------------------------------- |-------| :-------: |
-| None                                                                                   | 22.5% |          |
-| [OpenGraph](https://ogp.me/)                                                           | 68.7% |    ✔    |
-| [X Cards](https://developer.x.com/en/docs/x-for-websites/cards/guides/getting-started) | 53.8% |    ✔    |
-| [JSON-LD](https://www.w3.org/TR/json-ld/)                                              | 51.0% |    ✔    |
-| [RDFa](https://www.w3.org/TR/rdfa-primer/)                                             | 39.4% |     -     |
-| [Microdata](https://html.spec.whatwg.org/multipage/microdata.html)                     | 23.6% |    ✔    |
-| [Dublin Core](https://www.dublincore.org/specifications/dublin-core/dc-html/)          | 0.9%  |     -     |
-| [Microformats](https://microformats.org/wiki/Main_Page)                                | 0.4%  |     -     |
+| -------------------------------------------------------------------------------------- |------:| :-------: |
+| None                                                                                   | 21.2% |          |
+| [OpenGraph](https://ogp.me/)                                                           | 70.6% |    ✔    |
+| [X Cards](https://developer.x.com/en/docs/x-for-websites/cards/guides/getting-started) | 56.4% |    ✔    |
+| [JSON-LD](https://www.w3.org/TR/json-ld/)                                              | 53.5% |    ✔    |
+| [RDFa](https://www.w3.org/TR/rdfa-primer/)                                             | 38.9% |     -     |
+| [Microdata](https://html.spec.whatwg.org/multipage/microdata.html)                     | 22.5% |    ✔    |
+| [Dublin Core](https://www.dublincore.org/specifications/dublin-core/dc-html/)          |  0.8% |     -     |
+| [Microformats](https://microformats.org/wiki/Main_Page)                                |  0.5% |     -     |
 
 ## Installation
 
