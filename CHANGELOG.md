@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CHANGELOG.md` file with full history from v0.1.0 to v0.1.7
 - `codecov.yml` configuration file for Codecov
 
+### Changed
+- Bump minimum Go version from 1.18 to 1.25.0
+- Update dependency `golang.org/x/net` from v0.31.0 to v0.53.0
+
 ## [0.1.7] - 2025-07-01
 
 ### Changed
