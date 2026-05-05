@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump minimum Go version from 1.18 to 1.25.0
 - Update dependency `golang.org/x/net` from v0.31.0 to v0.53.0
 - Update GitHub Actions workflow Go version from 1.18 to 1.25.0
+- Add golangci-lint job to GitHub Actions workflow, build job depends on it passing
+- Add matrix strategy to CI: both jobs run on Go `1.25.0` and `stable`
+- Update `actions/setup-go` from `@v4` to `@v5`
+- Add `go vet` step to build job
+- Add `-race` flag to test run for race condition detection
+- Add vulnerability scan step (`govulncheck`) on `stable` Go version
+- Update `codecov/codecov-action` from `@v4.0.1` to `@v5`, upload only on `stable`
 
 ### Fixed
 - Replace unreachable `len(errs) < 0` condition with correct `len(errs) != 0` check in `extract_test.go`
