@@ -55,10 +55,13 @@ const (
 
 	// SyntaxDublinCore is the identifier used for the Dublin Core metadata syntax.
 	SyntaxDublinCore Syntax = "dublincore"
+
+	// SyntaxMicroformats is the identifier used for the Microformats2 metadata syntax.
+	SyntaxMicroformats Syntax = "microformats"
 )
 
 // SYNTAXES defines an array of metadata syntax identifiers supported for parsing.
-var SYNTAXES = []Syntax{SyntaxOpenGraph, SyntaxXCards, SyntaxJSONLD, SyntaxMicrodata, SyntaxRDFa, SyntaxDublinCore}
+var SYNTAXES = []Syntax{SyntaxOpenGraph, SyntaxXCards, SyntaxJSONLD, SyntaxMicrodata, SyntaxRDFa, SyntaxDublinCore, SyntaxMicroformats}
 
 // New creates a new instance of Extractor with default configurations and an empty map for extracted data.
 func New() *Extractor {
@@ -183,6 +186,14 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 			Name: SyntaxDublinCore,
 			Func: func() (any, []error) {
 				return extractor.DublinCore(e.url, e.content)
+			},
+		})
+	}
+	if contains(e.cfg.syntaxes, SyntaxMicroformats) {
+		processors = append(processors, Processor{
+			Name: SyntaxMicroformats,
+			Func: func() (any, []error) {
+				return extractor.Microformats(e.url, e.content)
 			},
 		})
 	}

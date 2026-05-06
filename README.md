@@ -27,7 +27,7 @@ Usage statistics of structured data formats for websites
 | [RDFa](https://www.w3.org/TR/rdfa-primer/)                                             | 38.9% |    ✔    |
 | [Microdata](https://html.spec.whatwg.org/multipage/microdata.html)                     | 22.5% |    ✔    |
 | [Dublin Core](https://www.dublincore.org/specifications/dublin-core/dc-html/)          |  0.8% |    ✔    |
-| [Microformats](https://microformats.org/wiki/Main_Page)                                |  0.5% |     -     |
+| [Microformats](https://microformats.org/wiki/Main_Page)                                |  0.5% |    ✔    |
 
 ## Installation
 
@@ -51,7 +51,7 @@ e := extract.New()
 
 ### Configuration defaults
 
-- syntaxes: `[]Syntax{extract.SyntaxOpenGraph, extract.SyntaxXCards, extract.SyntaxJSONLD, extract.SyntaxMicrodata, extract.SyntaxRDFa, extract.SyntaxDublinCore}`
+- syntaxes: `[]Syntax{extract.SyntaxOpenGraph, extract.SyntaxXCards, extract.SyntaxJSONLD, extract.SyntaxMicrodata, extract.SyntaxRDFa, extract.SyntaxDublinCore, extract.SyntaxMicroformats}`
 - userAgent: `"go-microdata-extract (+https://github.com/aafeher/go-microdata-extract/blob/main/README.md)"`
 - fetchTimeout: `3` seconds
 

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-05-06
+
+### Added
+- Microformats2 extractor (`extractors/microformats.go`) supporting `h-*` root items, `p-*` (text), `u-*` (URL), `dt-*` (datetime), and `e-*` (embedded HTML) property prefixes
+- `SyntaxMicroformats` constant (`"microformats"`) added to `SYNTAXES` and enabled by default
+- Nested item support: `h-*` child nodes used as both property values and `Children` entries
+- Add example: Microformats extraction with recursive nested item printing (`examples/getmicroformats`)
+
+### Changed
+- Default syntaxes list extended with `SyntaxMicroformats`
+- README: Microformats marked as supported in the formats table, default syntaxes updated
+
 ## [0.5.0] - 2026-05-06
 
 ### Added
@@ -119,7 +131,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for providing raw HTML content directly (bypassing HTTP fetch)
 - Examples: simple extraction, OpenGraph-only, configuring specific syntaxes
 
-[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.2.0...v0.3.0
