@@ -134,7 +134,7 @@ func extractXCards(htmlContent string) (*XCards, []error) {
 					content = attr.Val
 				}
 			}
-			if property != "" && content != "" {
+			if property != "" && content != "" && isXCardsProperty(property) {
 				parseXCardsMetaTag(xc, property, content)
 				xcHasValue = true
 			}
@@ -433,4 +433,14 @@ func FillMissingFieldsFromOpenGraph(target, source any) []error {
 	}
 
 	return errors
+}
+
+func isXCardsProperty(property string) bool {
+	return strings.HasPrefix(property, "twitter:") ||
+		strings.HasPrefix(property, "og:") ||
+		strings.HasPrefix(property, "music:") ||
+		strings.HasPrefix(property, "video:") ||
+		strings.HasPrefix(property, "article:") ||
+		strings.HasPrefix(property, "book:") ||
+		strings.HasPrefix(property, "profile:")
 }

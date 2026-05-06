@@ -52,10 +52,13 @@ const (
 
 	// SyntaxRDFa is the identifier used for the RDFa metadata syntax.
 	SyntaxRDFa Syntax = "rdfa"
+
+	// SyntaxDublinCore is the identifier used for the Dublin Core metadata syntax.
+	SyntaxDublinCore Syntax = "dublincore"
 )
 
 // SYNTAXES defines an array of metadata syntax identifiers supported for parsing.
-var SYNTAXES = []Syntax{SyntaxOpenGraph, SyntaxXCards, SyntaxJSONLD, SyntaxMicrodata, SyntaxRDFa}
+var SYNTAXES = []Syntax{SyntaxOpenGraph, SyntaxXCards, SyntaxJSONLD, SyntaxMicrodata, SyntaxRDFa, SyntaxDublinCore}
 
 // New creates a new instance of Extractor with default configurations and an empty map for extracted data.
 func New() *Extractor {
@@ -172,6 +175,14 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 			Name: SyntaxRDFa,
 			Func: func() (any, []error) {
 				return extractor.RDFa(e.url, e.content)
+			},
+		})
+	}
+	if contains(e.cfg.syntaxes, SyntaxDublinCore) {
+		processors = append(processors, Processor{
+			Name: SyntaxDublinCore,
+			Func: func() (any, []error) {
+				return extractor.DublinCore(e.url, e.content)
 			},
 		})
 	}
