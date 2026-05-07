@@ -126,6 +126,27 @@ e, err := e.Extract("https://github.com/aafeher/go-microdata-extract", nil)
 
 In this example, structured data is extracted from "https://github.com/aafeher/go-microdata-extract". The function fetches the content itself, as we passed nil as the urlContent.
 
+## Performance
+
+Benchmarks run on a 12th Gen Intel Core i7-1260P (16 threads), Go 1.25.0, measuring parse time per operation with content provided directly (no HTTP fetch overhead). Each extractor is run in isolation.
+
+| Format        | ns/op   | B/op    | allocs/op |
+|---------------|--------:|--------:|----------:|
+| OpenGraph     | ~14,600 |   9,152 |       115 |
+| X Cards       | ~22,000 |  16,232 |       163 |
+| JSON-LD       | ~22,100 |  12,272 |       115 |
+| W3C Microdata | ~19,200 |  14,916 |       170 |
+| RDFa          | ~14,300 |  12,408 |       132 |
+| Dublin Core   | ~10,900 |   9,184 |        87 |
+| Microformats  | ~17,900 |  12,760 |       149 |
+| All 7 (concurrent) | ~108,000 | 112,788 | 1,073 |
+
+Run benchmarks with:
+
+```bash
+go test -bench=. -benchmem ./...
+```
+
 ## Examples
 
 Examples can be found in [/examples](https://github.com/aafeher/go-microdata-extract/tree/main/examples).

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-05-07
+
+### Added
+- Benchmark tests (`extract_bench_test.go`) for all 7 formats: OpenGraph, X Cards, JSON-LD, W3C Microdata, RDFa, Dublin Core, and Microformats, plus a combined all-syntaxes benchmark
+- Performance section in README with benchmark results table and instructions for running benchmarks
+
 ## [0.6.0] - 2026-05-06
 
 ### Added
@@ -131,7 +137,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for providing raw HTML content directly (bypassing HTTP fetch)
 - Examples: simple extraction, OpenGraph-only, configuring specific syntaxes
 
-[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.3.0...v0.4.0
