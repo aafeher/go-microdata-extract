@@ -132,16 +132,28 @@ func NewOpenGraph() *OpenGraph {
 	return &OpenGraph{}
 }
 
-func ParseOpenGraph(URL string, htmlContent string) (any, []error) {
-	_ = URL
+func ParseOpenGraph(URL string, htmlContent string) (*OpenGraph, []error) {
 	item, errors := extractOpenGraph(htmlContent)
-
-	var results any
-	if item != nil {
-		results = item
+	if item != nil && URL != "" {
+		resolveOpenGraphURLs(item, URL)
 	}
+	return item, errors
+}
 
-	return results, errors
+func resolveOpenGraphURLs(og *OpenGraph, base string) {
+	og.URL = resolveURL(base, og.URL)
+	for i := range og.OpenGraphImage {
+		og.OpenGraphImage[i].URL = resolveURL(base, og.OpenGraphImage[i].URL)
+		og.OpenGraphImage[i].SecureURL = resolveURL(base, og.OpenGraphImage[i].SecureURL)
+	}
+	for i := range og.OpenGraphVideo {
+		og.OpenGraphVideo[i].URL = resolveURL(base, og.OpenGraphVideo[i].URL)
+		og.OpenGraphVideo[i].SecureURL = resolveURL(base, og.OpenGraphVideo[i].SecureURL)
+	}
+	for i := range og.OpenGraphAudio {
+		og.OpenGraphAudio[i].URL = resolveURL(base, og.OpenGraphAudio[i].URL)
+		og.OpenGraphAudio[i].SecureURL = resolveURL(base, og.OpenGraphAudio[i].SecureURL)
+	}
 }
 
 func extractOpenGraph(htmlContent string) (*OpenGraph, []error) {

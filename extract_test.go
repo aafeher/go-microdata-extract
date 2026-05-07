@@ -1708,7 +1708,7 @@ func TestExtractor_Extract(t *testing.T) {
 							"author":        "Jonathan C Slaght",
 							"datePublished": "2020-08-04",
 							"title":         "Owls of the Eastern Ice",
-							"discussionUrl": "//www.example.com/book/discussion",
+							"discussionUrl": "http://www.example.com/book/discussion",
 						},
 						Type: "https://schema.org/Book",
 					},
@@ -2265,6 +2265,36 @@ func TestExtractor_Extract(t *testing.T) {
 			extracted: map[Syntax]any{
 				"opengraph":    nil,
 				"xcards":       nil,
+				"json-ld":      []map[string]any(nil),
+				"microdata":    []extract.MicrodataItem(nil),
+				"rdfa":         []extract.RDFaItem(nil),
+				"dublincore":   nil,
+				"microformats": []extract.MicroformatItem(nil),
+			},
+			errs: nil,
+		},
+		{
+			name:    "test-56-opengraph-relative-urls",
+			url:     fmt.Sprintf("%s/test-56-opengraph-relative-urls.html", server.URL),
+			content: nil,
+			err:     nil,
+			extracted: map[Syntax]any{
+				"opengraph": &extract.OpenGraph{
+					Title: "Relative URL Test",
+					Type:  "website",
+					URL:   fmt.Sprintf("%s/about", server.URL),
+					OpenGraphImage: []extract.OpenGraphImage{
+						{URL: fmt.Sprintf("%s/images/photo.jpg", server.URL)},
+					},
+				},
+				"xcards": &extract.XCards{
+					Title: "Relative URL Test",
+					Type:  "website",
+					URL:   fmt.Sprintf("%s/about", server.URL),
+					OpenGraphImage: []extract.OpenGraphImage{
+						{URL: fmt.Sprintf("%s/images/photo.jpg", server.URL)},
+					},
+				},
 				"json-ld":      []map[string]any(nil),
 				"microdata":    []extract.MicrodataItem(nil),
 				"rdfa":         []extract.RDFaItem(nil),

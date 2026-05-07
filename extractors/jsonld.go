@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-func JSONLD(URL string, htmlContent string) ([]map[string]any, []error) {
-	_ = URL
+func JSONLD(_ string, htmlContent string) ([]map[string]any, []error) {
 	return extractJSONLD(htmlContent)
 }
 

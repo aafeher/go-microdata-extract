@@ -10,8 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.0] - 2026-05-07
 
 ### Added
-- RDFa error/edge-case test fixture (`test/test-55-rdfa-errors.html`) — HTML with no RDFa items and a dangling `property` attribute without a `typeof` parent
-- Corresponding `test-55-rdfa-errors` test case in `extract_test.go`
+- RDFa error/edge-case test fixture (`test/test-55-rdfa-errors.html`) — HTML with no RDFa items and a dangling `property` attribute without a `typeof` parent; corresponding `test-55-rdfa-errors` test case added
+- Relative URL resolution test fixture (`test/test-56-opengraph-relative-urls.html`) with corresponding `test-56-opengraph-relative-urls` test case verifying path-relative URLs are resolved against the page base URL
+- `resolveURL(base, ref string) string` shared helper in `extractors/w3cmicrodata.go` using `url.URL.ResolveReference` (handles absolute, protocol-relative, and path-relative refs correctly)
+- `resolveOpenGraphURLs` in `extractors/opengraph.go` — resolves `og:url`, image/video/audio URL and SecureURL fields
+- `resolveXCardsURLs` in `extractors/xcards.go` — resolves twitter/og image/video/audio URL and SecureURL fields
+
+### Changed
+- **API: `ParseOpenGraph` return type** changed from `(any, []error)` to `(*OpenGraph, []error)`; `extract.go` wrapper converts typed nil to untyped nil to preserve map semantics
+- **API: `ParseXCards` return type** changed from `(any, []error)` to `(*XCards, []error)`; same nil handling in wrapper
+- **API: `DublinCore` return type** changed from `(any, []error)` to `(*DublinCoreItem, []error)`; same nil handling in wrapper
+- `JSONLD` signature: unused named parameter `URL string` replaced with blank identifier `_ string`
+- `DublinCore` link `href` values are now resolved against the page URL (previously stored verbatim)
+- W3CMicrodata inline URL resolution replaced with shared `resolveURL` — protocol-relative URLs (`//host/path`) are now properly resolved to `http://host/path`; existing test updated (`test-35-w3cmicrodata-book`: `discussionUrl` value updated from `//www.example.com/…` to `http://www.example.com/…`)
+- `parseDublinCore` now accepts a URL parameter and handles `html.Parse` errors
+- `parseMicroformats`, `parseRDFa`, `parseW3CMicrodata` now handle `html.Parse` errors instead of discarding them
 
 ### Fixed
 - Remove always-true dead condition `if len(items) >= 0` in `extractors/jsonld.go` — simplified `JSONLD()` to return `extractJSONLD()` directly

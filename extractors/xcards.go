@@ -81,8 +81,7 @@ func NewXCards() *XCards {
 	return &XCards{}
 }
 
-func ParseXCards(URL string, htmlContent string) (any, []error) {
-	_ = URL
+func ParseXCards(URL string, htmlContent string) (*XCards, []error) {
 	itemXCards, errorsXCards := extractXCards(htmlContent)
 
 	itemOpenGraph, errorsOpenGraph := extractOpenGraph(htmlContent)
@@ -94,12 +93,38 @@ func ParseXCards(URL string, htmlContent string) (any, []error) {
 		errorsXCards = append(errorsXCards, errorsFillMissing...)
 	}
 
-	var results any
-	if itemXCards != nil {
-		results = itemXCards
+	if itemXCards != nil && URL != "" {
+		resolveXCardsURLs(itemXCards, URL)
 	}
 
-	return results, append(errorsXCards, errorsOpenGraph...)
+	return itemXCards, append(errorsXCards, errorsOpenGraph...)
+}
+
+func resolveXCardsURLs(xc *XCards, base string) {
+	xc.URL = resolveURL(base, xc.URL)
+	for i := range xc.OpenGraphImage {
+		xc.OpenGraphImage[i].URL = resolveURL(base, xc.OpenGraphImage[i].URL)
+		xc.OpenGraphImage[i].SecureURL = resolveURL(base, xc.OpenGraphImage[i].SecureURL)
+	}
+	for i := range xc.OpenGraphVideo {
+		xc.OpenGraphVideo[i].URL = resolveURL(base, xc.OpenGraphVideo[i].URL)
+		xc.OpenGraphVideo[i].SecureURL = resolveURL(base, xc.OpenGraphVideo[i].SecureURL)
+	}
+	for i := range xc.OpenGraphAudio {
+		xc.OpenGraphAudio[i].URL = resolveURL(base, xc.OpenGraphAudio[i].URL)
+		xc.OpenGraphAudio[i].SecureURL = resolveURL(base, xc.OpenGraphAudio[i].SecureURL)
+	}
+	for i := range xc.XCardsImage {
+		xc.XCardsImage[i].URL = resolveURL(base, xc.XCardsImage[i].URL)
+		xc.XCardsImage[i].SecureURL = resolveURL(base, xc.XCardsImage[i].SecureURL)
+	}
+	for i := range xc.XCardsVideo {
+		xc.XCardsVideo[i].URL = resolveURL(base, xc.XCardsVideo[i].URL)
+		xc.XCardsVideo[i].SecureURL = resolveURL(base, xc.XCardsVideo[i].SecureURL)
+	}
+	for i := range xc.XCardsAudio {
+		xc.XCardsAudio[i].URL = resolveURL(base, xc.XCardsAudio[i].URL)
+	}
 }
 
 func extractXCards(htmlContent string) (*XCards, []error) {

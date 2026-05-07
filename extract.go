@@ -145,7 +145,11 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 		processors = append(processors, Processor{
 			Name: SyntaxOpenGraph,
 			Func: func() (any, []error) {
-				return extractor.ParseOpenGraph(e.url, e.content)
+				result, errs := extractor.ParseOpenGraph(e.url, e.content)
+				if result == nil {
+					return nil, errs
+				}
+				return result, errs
 			},
 		})
 	}
@@ -153,7 +157,11 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 		processors = append(processors, Processor{
 			Name: SyntaxXCards,
 			Func: func() (any, []error) {
-				return extractor.ParseXCards(e.url, e.content)
+				result, errs := extractor.ParseXCards(e.url, e.content)
+				if result == nil {
+					return nil, errs
+				}
+				return result, errs
 			},
 		})
 	}
@@ -185,7 +193,11 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 		processors = append(processors, Processor{
 			Name: SyntaxDublinCore,
 			Func: func() (any, []error) {
-				return extractor.DublinCore(e.url, e.content)
+				result, errs := extractor.DublinCore(e.url, e.content)
+				if result == nil {
+					return nil, errs
+				}
+				return result, errs
 			},
 		})
 	}

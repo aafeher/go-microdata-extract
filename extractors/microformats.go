@@ -2,6 +2,7 @@ package extractor
 
 import (
 	"golang.org/x/net/html"
+	"io"
 	"strings"
 )
 
@@ -18,7 +19,14 @@ func Microformats(_ string, htmlContent string) ([]MicroformatItem, []error) {
 }
 
 func parseMicroformats(htmlContent string) ([]MicroformatItem, []error) {
-	doc, _ := html.Parse(strings.NewReader(htmlContent))
+	return parseMicroformatsFrom(strings.NewReader(htmlContent))
+}
+
+func parseMicroformatsFrom(r io.Reader) ([]MicroformatItem, []error) {
+	doc, err := html.Parse(r)
+	if err != nil {
+		return nil, []error{err}
+	}
 	var items []MicroformatItem
 	walkMicroformats(doc, &items)
 	return items, nil

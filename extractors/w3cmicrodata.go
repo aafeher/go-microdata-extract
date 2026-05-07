@@ -1,9 +1,8 @@
 package extractor
 
 import (
-	"fmt"
 	"golang.org/x/net/html"
-	"net/url"
+	"io"
 	"strings"
 )
 
@@ -34,10 +33,16 @@ func W3CMicrodata(URL string, htmlContent string) ([]MicrodataItem, []error) {
 
 // parseW3CMicrodata parses an HTML input string to extract W3C microdata items and returns them along with any errors.
 func parseW3CMicrodata(URL string, input string) ([]*MicrodataItem, []error) {
+	return parseW3CMicrodataFrom(URL, strings.NewReader(input))
+}
+
+func parseW3CMicrodataFrom(URL string, r io.Reader) ([]*MicrodataItem, []error) {
 	var errors []error
 
-	// strings.NewReader() always provides a valid reader for html.Parse()
-	doc, _ := html.Parse(strings.NewReader(input))
+	doc, err := html.Parse(r)
+	if err != nil {
+		return nil, []error{err}
+	}
 
 	var items []*MicrodataItem
 	var parseNode func(*html.Node)
@@ -94,17 +99,7 @@ func parseProperties(n *html.Node, item *MicrodataItem, URL string) {
 					} else if datetime := getAttrVal(c, "datetime"); datetime != "" {
 						value = datetime
 					} else if prop == "url" || strings.HasSuffix(prop, "Url") {
-						href := getAttrVal(c, "href")
-						if strings.HasPrefix(href, "//") || strings.HasPrefix(href, "http://") || strings.HasPrefix(href, "https://") {
-							value = href
-						} else {
-							baseURL := ""
-							parsedURL, err := url.Parse(URL)
-							if err == nil {
-								baseURL = fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
-							}
-							value = baseURL + href
-						}
+						value = resolveURL(URL, getAttrVal(c, "href"))
 					}
 					item.Properties[prop] = appendValue(item.Properties[prop], value)
 				}

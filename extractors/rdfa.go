@@ -2,6 +2,7 @@ package extractor
 
 import (
 	"golang.org/x/net/html"
+	"io"
 	"strings"
 )
 
@@ -20,7 +21,14 @@ func RDFa(_ string, htmlContent string) ([]RDFaItem, []error) {
 }
 
 func parseRDFa(htmlContent string) ([]RDFaItem, []error) {
-	doc, _ := html.Parse(strings.NewReader(htmlContent))
+	return parseRDFaFrom(strings.NewReader(htmlContent))
+}
+
+func parseRDFaFrom(r io.Reader) ([]RDFaItem, []error) {
+	doc, err := html.Parse(r)
+	if err != nil {
+		return nil, []error{err}
+	}
 	prefixes := collectRDFaPrefixes(doc)
 
 	var items []RDFaItem
