@@ -8,8 +8,3 @@ import "fmt"
 type errReader struct{}
 
 func (errReader) Read(_ []byte) (int, error) { return 0, fmt.Errorf("read error") }
-
-// pointerOfString returns a pointer to the given string value.
-func pointerOfString(s string) *string {
-	return &s
-}
