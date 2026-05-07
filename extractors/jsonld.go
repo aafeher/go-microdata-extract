@@ -8,14 +8,7 @@ import (
 
 func JSONLD(URL string, htmlContent string) ([]map[string]any, []error) {
 	_ = URL
-	items, errors := extractJSONLD(htmlContent)
-
-	var results []map[string]any
-	if len(items) >= 0 {
-		results = append(results, items...)
-	}
-
-	return results, errors
+	return extractJSONLD(htmlContent)
 }
 
 func extractJSONLD(htmlContent string) ([]map[string]any, []error) {

@@ -2257,6 +2257,22 @@ func TestExtractor_Extract(t *testing.T) {
 			},
 			errs: nil,
 		},
+		{
+			name:    "test-55-rdfa-errors",
+			url:     fmt.Sprintf("%s/test-55-rdfa-errors.html", server.URL),
+			content: nil,
+			err:     nil,
+			extracted: map[Syntax]any{
+				"opengraph":    nil,
+				"xcards":       nil,
+				"json-ld":      []map[string]any(nil),
+				"microdata":    []extract.MicrodataItem(nil),
+				"rdfa":         []extract.RDFaItem(nil),
+				"dublincore":   nil,
+				"microformats": []extract.MicroformatItem(nil),
+			},
+			errs: nil,
+		},
 	}
 
 	for _, test := range tests {

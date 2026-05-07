@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-05-07
+
+### Added
+- RDFa error/edge-case test fixture (`test/test-55-rdfa-errors.html`) — HTML with no RDFa items and a dangling `property` attribute without a `typeof` parent
+- Corresponding `test-55-rdfa-errors` test case in `extract_test.go`
+
+### Fixed
+- Remove always-true dead condition `if len(items) >= 0` in `extractors/jsonld.go` — simplified `JSONLD()` to return `extractJSONLD()` directly
+- Remove no-op nil→empty-slice init blocks in `extractors/opengraph.go` — `handleOpenGraphImageProperty`, `handleOpenGraphVideoProperty`, `handleOpenGraphAudioProperty` each had a redundant `if len == 0 { slice = []T{} }` block (Go's `append` works identically on nil and empty slices)
+
 ## [0.7.0] - 2026-05-07
 
 ### Added
@@ -137,7 +147,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for providing raw HTML content directly (bypassing HTTP fetch)
 - Examples: simple extraction, OpenGraph-only, configuring specific syntaxes
 
-[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.4.0...v0.5.0
