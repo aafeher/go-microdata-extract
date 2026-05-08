@@ -7,10 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- `GetErrors() []error` method on `Extractor` — exposes the accumulated parse errors from the last `Extract()` call; previously `errs` was a private field with no public getter
+## [0.11.0] - 2026-05-08
 
 ### Added
+- `GetErrors() []error` method on `Extractor` — exposes the accumulated parse errors from the last `Extract()` call; previously `errs` was a private field with no public getter
 - `DefaultSyntaxes() []Syntax` function — returns a fresh copy of the default syntax list; safe to iterate or pass to `SetSyntaxes` without risk of mutating the package-level default
 
 ### Changed
@@ -195,7 +195,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for providing raw HTML content directly (bypassing HTTP fetch)
 - Examples: simple extraction, OpenGraph-only, configuring specific syntaxes
 
-[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.7.0...v0.8.0
