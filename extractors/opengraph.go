@@ -1,7 +1,6 @@
 package extractor
 
 import (
-	"fmt"
 	"golang.org/x/net/html"
 	"io"
 	"strings"
@@ -205,7 +204,6 @@ func extractOpenGraph(htmlContent string) (*OpenGraph, []error) {
 }
 
 func parseOpenGraphMetaTag(og *OpenGraph, property, content string) {
-	// Split property into parts to handle multi-level properties
 	parts := strings.Split(property, ":")
 
 	switch {
@@ -243,241 +241,71 @@ func parseOpenGraphMetaTag(og *OpenGraph, property, content string) {
 
 	// Music handling with multi-level properties
 	case strings.HasPrefix(property, "music:"):
-		if og.Music == nil {
-			og.Music = &Music{}
-		}
+		parseMusicProperty(&og.Music, parts, property, content)
 
-		switch {
-		case property == "music:duration":
-			og.Music.Duration = parseIntSafely(content)
-		case property == "music:album":
-			og.Music.Album = content
-		case property == "music:album:disc":
-			og.Music.AlbumDisc = parseIntSafely(content)
-		case property == "music:album:track":
-			og.Music.AlbumTrack = parseIntSafely(content)
-		case property == "music:musician":
-			og.Music.Musician = append(og.Music.Musician, content)
-		case strings.HasPrefix(property, "music:song"):
-			handleMusicSongProperty(og.Music, parts, content)
-		case property == "music:release_date":
-			og.Music.ReleaseDate = content
-		case property == "music:creator":
-			og.Music.Creator = append(og.Music.Creator, content)
-		}
-
-	// Video handling with multi-level properties
+	// Video object handling with multi-level properties
 	case strings.HasPrefix(property, "video:"):
-		if og.Video == nil {
-			og.Video = &Video{}
-		}
+		parseVideoObjectProperty(&og.Video, parts, property, content)
 
-		switch {
-		case strings.HasPrefix(property, "video:actor"):
-			handleVideoActorProperty(og.Video, parts, content)
-		case property == "video:director":
-			og.Video.Director = append(og.Video.Director, content)
-		case property == "video:writer":
-			og.Video.Writer = append(og.Video.Writer, content)
-		case property == "video:duration":
-			og.Video.Duration = parseIntSafely(content)
-		case property == "video:release_date":
-			og.Video.ReleaseDate = parseTimeSafely(content)
-		case property == "video:tag":
-			og.Video.Tag = append(og.Video.Tag, content)
-		case property == "video:series":
-			og.Video.Series = content
-		}
-
-	// Article handling remains the same
+	// Article handling
 	case strings.HasPrefix(property, "article:"):
-		if og.Article == nil {
-			og.Article = &Article{}
-		}
-		switch property {
-		case "article:published_time":
-			og.Article.PublishedTime = parseTimeSafely(content)
-		case "article:modified_time":
-			og.Article.ModifiedTime = parseTimeSafely(content)
-		case "article:expiration_time":
-			og.Article.ExpirationTime = parseTimeSafely(content)
-		case "article:author":
-			og.Article.Author = append(og.Article.Author, content)
-		case "article:section":
-			og.Article.Section = content
-		case "article:tag":
-			og.Article.Tag = append(og.Article.Tag, content)
-		}
+		parseArticleProperty(&og.Article, property, content)
 
-	// Book handling remains the same
+	// Book handling
 	case strings.HasPrefix(property, "book:"):
-		if og.Book == nil {
-			og.Book = &Book{}
-		}
-		switch property {
-		case "book:isbn":
-			og.Book.ISBN = content
-		case "book:release_date":
-			og.Book.ReleaseDate = parseTimeSafely(content)
-		case "book:author":
-			og.Book.Author = append(og.Book.Author, content)
-		case "book:tag":
-			og.Book.Tag = append(og.Book.Tag, content)
-		}
+		parseBookProperty(&og.Book, property, content)
 
-	// Profile handling remains the same
+	// Profile handling
 	case strings.HasPrefix(property, "profile:"):
-		if og.Profile == nil {
-			og.Profile = &Profile{}
-		}
-		switch property {
-		case "profile:first_name":
-			og.Profile.FirstName = content
-		case "profile:last_name":
-			og.Profile.LastName = content
-		case "profile:username":
-			og.Profile.Username = content
-		case "profile:gender":
-			og.Profile.Gender = content
-		}
+		parseProfileProperty(&og.Profile, property, content)
 	}
 }
 
 func handleOpenGraphImageProperty(og *OpenGraph, parts []string, content string) {
-	if len(og.OpenGraphImage) == 0 || parts[1] == "image" {
-		if len(parts) < 3 || len(og.OpenGraphImage) == 0 {
-			og.OpenGraphImage = append(og.OpenGraphImage, OpenGraphImage{})
+	handleMediaSlice(&og.OpenGraphImage, "image", parts, content, func(img *OpenGraphImage, sub, val string) {
+		switch sub {
+		case "":
+			img.URL = val
+		case "secure_url":
+			img.SecureURL = val
+		case "type":
+			img.Type = val
+		case "width":
+			img.Width = parseIntSafely(val)
+		case "height":
+			img.Height = parseIntSafely(val)
+		case "alt":
+			img.Alt = val
 		}
-	}
-	lastIdx := len(og.OpenGraphImage) - 1
-
-	if len(parts) == 2 {
-		og.OpenGraphImage[lastIdx].URL = content
-		return
-	}
-
-	switch parts[2] {
-	case "secure_url":
-		og.OpenGraphImage[lastIdx].SecureURL = content
-	case "type":
-		og.OpenGraphImage[lastIdx].Type = content
-	case "width":
-		og.OpenGraphImage[lastIdx].Width = parseIntSafely(content)
-	case "height":
-		og.OpenGraphImage[lastIdx].Height = parseIntSafely(content)
-	case "alt":
-		og.OpenGraphImage[lastIdx].Alt = content
-	}
+	})
 }
 
 func handleOpenGraphVideoProperty(og *OpenGraph, parts []string, content string) {
-	if len(og.OpenGraphVideo) == 0 || parts[1] == "video" {
-		if len(parts) < 3 || len(og.OpenGraphVideo) == 0 {
-			og.OpenGraphVideo = append(og.OpenGraphVideo, OpenGraphVideo{})
+	handleMediaSlice(&og.OpenGraphVideo, "video", parts, content, func(v *OpenGraphVideo, sub, val string) {
+		switch sub {
+		case "":
+			v.URL = val
+		case "secure_url":
+			v.SecureURL = val
+		case "type":
+			v.Type = val
+		case "width":
+			v.Width = parseIntSafely(val)
+		case "height":
+			v.Height = parseIntSafely(val)
 		}
-	}
-	lastIdx := len(og.OpenGraphVideo) - 1
-
-	if len(parts) == 2 {
-		og.OpenGraphVideo[lastIdx].URL = content
-		return
-	}
-
-	switch parts[2] {
-	case "secure_url":
-		og.OpenGraphVideo[lastIdx].SecureURL = content
-	case "type":
-		og.OpenGraphVideo[lastIdx].Type = content
-	case "width":
-		og.OpenGraphVideo[lastIdx].Width = parseIntSafely(content)
-	case "height":
-		og.OpenGraphVideo[lastIdx].Height = parseIntSafely(content)
-	}
+	})
 }
 
 func handleOpenGraphAudioProperty(og *OpenGraph, parts []string, content string) {
-	if len(og.OpenGraphAudio) == 0 || parts[1] == "audio" {
-		if len(parts) < 3 || len(og.OpenGraphAudio) == 0 {
-			og.OpenGraphAudio = append(og.OpenGraphAudio, OpenGraphAudio{})
+	handleMediaSlice(&og.OpenGraphAudio, "audio", parts, content, func(a *OpenGraphAudio, sub, val string) {
+		switch sub {
+		case "":
+			a.URL = val
+		case "secure_url":
+			a.SecureURL = val
+		case "type":
+			a.Type = val
 		}
-	}
-	lastIdx := len(og.OpenGraphAudio) - 1
-
-	if len(parts) == 2 {
-		og.OpenGraphAudio[lastIdx].URL = content
-		return
-	}
-
-	switch parts[2] {
-	case "secure_url":
-		og.OpenGraphAudio[lastIdx].SecureURL = content
-	case "type":
-		og.OpenGraphAudio[lastIdx].Type = content
-	}
-}
-
-func handleMusicSongProperty(music *Music, parts []string, content string) {
-	if len(music.Song) == 0 || parts[1] == "song" {
-		if len(parts) < 3 {
-			music.Song = append(music.Song, MusicSong{})
-		}
-	}
-	lastIdx := len(music.Song) - 1
-
-	if len(parts) == 2 {
-		music.Song[lastIdx].URL = content
-		return
-	}
-
-	switch parts[2] {
-	case "disc":
-		music.Song[lastIdx].Disc = parseIntSafely(content)
-	case "track":
-		music.Song[lastIdx].Track = parseIntSafely(content)
-	}
-}
-
-func handleVideoActorProperty(video *Video, parts []string, content string) {
-	if len(video.Actor) == 0 || parts[1] == "actor" {
-		if len(parts) < 3 {
-			video.Actor = append(video.Actor, VideoActor{})
-		}
-	}
-	lastIdx := len(video.Actor) - 1
-
-	if len(parts) == 2 {
-		video.Actor[lastIdx].URL = content
-		return
-	}
-
-	switch parts[2] {
-	case "role":
-		video.Actor[lastIdx].Role = content
-	}
-}
-
-func parseIntSafely(s string) int {
-	var result int
-	_, err := fmt.Sscanf(s, "%d", &result)
-	if err != nil {
-		return 0
-	}
-	return result
-}
-
-func parseTimeSafely(s string) time.Time {
-	// Try common date formats
-	formats := []string{
-		time.RFC3339,
-		"2006-01-02T15:04:05Z0700",
-		"2006-01-02T15:04:05",
-		"2006-01-02",
-	}
-
-	for _, format := range formats {
-		if t, err := time.Parse(format, s); err == nil {
-			return t
-		}
-	}
-	return time.Time{}
+	})
 }

@@ -176,7 +176,6 @@ func extractXCards(htmlContent string) (*XCards, []error) {
 }
 
 func parseXCardsMetaTag(xc *XCards, property, content string) {
-	// Split property into parts to handle multi-level properties
 	parts := strings.Split(property, ":")
 
 	switch {
@@ -222,182 +221,73 @@ func parseXCardsMetaTag(xc *XCards, property, content string) {
 
 	// Music handling with multi-level properties
 	case strings.HasPrefix(property, "music:"):
-		if xc.Music == nil {
-			xc.Music = &Music{}
-		}
+		parseMusicProperty(&xc.Music, parts, property, content)
 
-		switch {
-		case property == "music:duration":
-			xc.Music.Duration = parseIntSafely(content)
-		case property == "music:album":
-			xc.Music.Album = content
-		case property == "music:album:disc":
-			xc.Music.AlbumDisc = parseIntSafely(content)
-		case property == "music:album:track":
-			xc.Music.AlbumTrack = parseIntSafely(content)
-		case property == "music:musician":
-			xc.Music.Musician = append(xc.Music.Musician, content)
-		case strings.HasPrefix(property, "music:song"):
-			handleMusicSongProperty(xc.Music, parts, content)
-		case property == "music:creator":
-			xc.Music.Creator = append(xc.Music.Creator, content)
-		case property == "music:release_date":
-			xc.Music.ReleaseDate = content
-		}
-
-	// Video handling with multi-level properties
+	// Video object handling with multi-level properties
 	case strings.HasPrefix(property, "video:"):
-		if xc.Video == nil {
-			xc.Video = &Video{}
-		}
+		parseVideoObjectProperty(&xc.Video, parts, property, content)
 
-		switch {
-		case strings.HasPrefix(property, "video:actor"):
-			handleVideoActorProperty(xc.Video, parts, content)
-		case property == "video:director":
-			xc.Video.Director = append(xc.Video.Director, content)
-		case property == "video:writer":
-			xc.Video.Writer = append(xc.Video.Writer, content)
-		case property == "video:duration":
-			xc.Video.Duration = parseIntSafely(content)
-		case property == "video:release_date":
-			xc.Video.ReleaseDate = parseTimeSafely(content)
-		case property == "video:tag":
-			xc.Video.Tag = append(xc.Video.Tag, content)
-		case property == "video:series":
-			xc.Video.Series = content
-		}
-
-	// Article handling remains the same
+	// Article handling
 	case strings.HasPrefix(property, "article:"):
-		if xc.Article == nil {
-			xc.Article = &Article{}
-		}
-		switch property {
-		case "article:published_time":
-			xc.Article.PublishedTime = parseTimeSafely(content)
-		case "article:modified_time":
-			xc.Article.ModifiedTime = parseTimeSafely(content)
-		case "article:expiration_time":
-			xc.Article.ExpirationTime = parseTimeSafely(content)
-		case "article:author":
-			xc.Article.Author = append(xc.Article.Author, content)
-		case "article:section":
-			xc.Article.Section = content
-		case "article:tag":
-			xc.Article.Tag = append(xc.Article.Tag, content)
-		}
+		parseArticleProperty(&xc.Article, property, content)
 
-	// Book handling remains the same
+	// Book handling
 	case strings.HasPrefix(property, "book:"):
-		if xc.Book == nil {
-			xc.Book = &Book{}
-		}
-		switch property {
-		case "book:isbn":
-			xc.Book.ISBN = content
-		case "book:release_date":
-			xc.Book.ReleaseDate = parseTimeSafely(content)
-		case "book:author":
-			xc.Book.Author = append(xc.Book.Author, content)
-		case "book:tag":
-			xc.Book.Tag = append(xc.Book.Tag, content)
-		}
+		parseBookProperty(&xc.Book, property, content)
 
-	// Profile handling remains the same
+	// Profile handling
 	case strings.HasPrefix(property, "profile:"):
-		if xc.Profile == nil {
-			xc.Profile = &Profile{}
-		}
-		switch property {
-		case "profile:first_name":
-			xc.Profile.FirstName = content
-		case "profile:last_name":
-			xc.Profile.LastName = content
-		case "profile:username":
-			xc.Profile.Username = content
-		case "profile:gender":
-			xc.Profile.Gender = content
-		}
+		parseProfileProperty(&xc.Profile, property, content)
 	}
 }
 
 func handleXCardsImageProperty(xc *XCards, parts []string, content string) {
-	if len(xc.XCardsImage) == 0 || parts[1] == "image" {
-		if len(parts) < 3 {
-			xc.XCardsImage = append(xc.XCardsImage, XCardsImage{})
+	handleMediaSlice(&xc.XCardsImage, "image", parts, content, func(img *XCardsImage, sub, val string) {
+		switch sub {
+		case "":
+			img.URL = val
+		case "secure_url":
+			img.SecureURL = val
+		case "type":
+			img.Type = val
+		case "width":
+			img.Width = parseIntSafely(val)
+		case "height":
+			img.Height = parseIntSafely(val)
+		case "alt":
+			img.Alt = val
 		}
-	}
-	lastIdx := len(xc.XCardsImage) - 1
-
-	if lastIdx < 0 {
-		xc.XCardsImage = append(xc.XCardsImage, XCardsImage{})
-		lastIdx = 0
-	}
-
-	if len(parts) == 2 {
-		xc.XCardsImage[lastIdx].URL = content
-		return
-	}
-
-	switch parts[2] {
-	case "secure_url":
-		xc.XCardsImage[lastIdx].SecureURL = content
-	case "type":
-		xc.XCardsImage[lastIdx].Type = content
-	case "width":
-		xc.XCardsImage[lastIdx].Width = parseIntSafely(content)
-	case "height":
-		xc.XCardsImage[lastIdx].Height = parseIntSafely(content)
-	case "alt":
-		xc.XCardsImage[lastIdx].Alt = content
-	}
+	})
 }
 
 func handleXCardsVideoProperty(xc *XCards, parts []string, content string) {
-	if len(xc.XCardsVideo) == 0 || parts[1] == "video" {
-		if len(parts) < 3 {
-			xc.XCardsVideo = append(xc.XCardsVideo, XCardsVideo{})
+	handleMediaSlice(&xc.XCardsVideo, "video", parts, content, func(v *XCardsVideo, sub, val string) {
+		switch sub {
+		case "":
+			v.URL = val
+		case "secure_url":
+			v.SecureURL = val
+		case "type":
+			v.Type = val
+		case "width":
+			v.Width = parseIntSafely(val)
+		case "height":
+			v.Height = parseIntSafely(val)
 		}
-	}
-	lastIdx := len(xc.XCardsVideo) - 1
-
-	if len(parts) == 2 {
-		xc.XCardsVideo[lastIdx].URL = content
-		return
-	}
-
-	switch parts[2] {
-	case "secure_url":
-		xc.XCardsVideo[lastIdx].SecureURL = content
-	case "type":
-		xc.XCardsVideo[lastIdx].Type = content
-	case "width":
-		xc.XCardsVideo[lastIdx].Width = parseIntSafely(content)
-	case "height":
-		xc.XCardsVideo[lastIdx].Height = parseIntSafely(content)
-	}
+	})
 }
 
 func handleXCardsAudioProperty(xc *XCards, parts []string, content string) {
-	if len(xc.XCardsAudio) == 0 || parts[1] == "audio" {
-		if len(parts) < 3 {
-			xc.XCardsAudio = append(xc.XCardsAudio, XCardsAudio{})
+	handleMediaSlice(&xc.XCardsAudio, "audio", parts, content, func(a *XCardsAudio, sub, val string) {
+		switch sub {
+		case "":
+			a.URL = val
+		case "secure_url":
+			a.SecureURL = val
+		case "type":
+			a.Type = val
 		}
-	}
-	lastIdx := len(xc.XCardsAudio) - 1
-
-	if len(parts) == 2 {
-		xc.XCardsAudio[lastIdx].URL = content
-		return
-	}
-
-	switch parts[2] {
-	case "secure_url":
-		xc.XCardsAudio[lastIdx].SecureURL = content
-	case "type":
-		xc.XCardsAudio[lastIdx].Type = content
-	}
+	})
 }
 
 // FillMissingFieldsFromOpenGraph fills missing fields in the target struct with values from the source struct.

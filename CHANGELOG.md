@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-05-08
+
+### Changed
+- Extracted shared `handleMediaSlice[T any]` generic helper to `extractors/shared.go` — consolidates the slice-management boilerplate (append-or-reuse-last pattern) that was duplicated across all six media property handlers in `opengraph.go` and `xcards.go`
+- Extracted `parseMusicProperty`, `parseVideoObjectProperty`, `parseArticleProperty`, `parseBookProperty`, `parseProfileProperty` to `extractors/shared.go` — the five namespace-property switch blocks were identical between `parseOpenGraphMetaTag` and `parseXCardsMetaTag`
+- Moved `handleMusicSongProperty`, `handleVideoActorProperty`, `parseIntSafely`, `parseTimeSafely` to `extractors/shared.go` — these helpers are shared across multiple files and now live in a single authoritative location
+- `handleOpenGraphImageProperty`, `handleOpenGraphVideoProperty`, `handleOpenGraphAudioProperty` and their XCards counterparts are now thin wrappers over `handleMediaSlice`, reducing each handler to a format-specific field-assignment closure
+
 ## [0.8.0] - 2026-05-07
 
 ### Added
@@ -160,7 +168,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for providing raw HTML content directly (bypassing HTTP fetch)
 - Examples: simple extraction, OpenGraph-only, configuring specific syntaxes
 
-[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.5.0...v0.6.0
