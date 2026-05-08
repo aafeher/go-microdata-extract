@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-05-08
+
+### Added
+- `context.Context` parameter as the first argument of `Extract()` — HTTP fetches now respect context cancellation and deadline; pass `context.Background()` for the previous behaviour
+- `SetHTTPClient(client *http.Client) *Extractor` — injects a fully custom HTTP client (enables proxy, mutual TLS, custom transport, auth headers); when set, the client's own timeout is used instead of `fetchTimeout`
+- `FetchError` structured error type (`URL string`, `Err error`) returned by `Extract()` on network or non-200 failures; supports `errors.As` and `errors.Unwrap`
+- `ParseError` structured error type (`Syntax Syntax`, `Err error`) wrapping every per-extractor error accumulated in `Extractor.errs`; supports `errors.As` and `errors.Unwrap`
+- `httpClient *http.Client` field added to internal `config` struct (zero value = use default client built from `fetchTimeout`)
+
+### Changed
+- **API: `Extract(url, content)` → `Extract(ctx, url, content)`** — `context.Context` is now the first parameter; all callers (examples, benchmarks, tests) updated
+- `fetch()` now uses `http.NewRequestWithContext` instead of `http.NewRequest`, propagating the caller's context to the HTTP layer
+- All errors returned from `fetch()` are now wrapped in `*FetchError`; callers can use `errors.As(err, &FetchError{})` to check for fetch vs parse failures
+- Parse errors from extractor goroutines are now wrapped in `*ParseError` (tagged with the producing `Syntax`) before being appended to `Extractor.errs`
+- `errorhandling` example updated to demonstrate `errors.As` with `*FetchError`
+
 ## [0.9.0] - 2026-05-08
 
 ### Changed
@@ -168,7 +184,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for providing raw HTML content directly (bypassing HTTP fetch)
 - Examples: simple extraction, OpenGraph-only, configuring specific syntaxes
 
-[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.6.0...v0.7.0

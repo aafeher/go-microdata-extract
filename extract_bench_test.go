@@ -1,6 +1,7 @@
 package extract
 
 import (
+	"context"
 	"os"
 	"testing"
 )
@@ -53,7 +54,7 @@ func BenchmarkExtract_OpenGraph(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		e := New().SetSyntaxes([]Syntax{SyntaxOpenGraph})
-		_, _ = e.Extract("http://example.com", &content)
+		_, _ = e.Extract(context.Background(), "http://example.com", &content)
 	}
 }
 
@@ -63,7 +64,7 @@ func BenchmarkExtract_XCards(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		e := New().SetSyntaxes([]Syntax{SyntaxXCards})
-		_, _ = e.Extract("http://example.com", &content)
+		_, _ = e.Extract(context.Background(), "http://example.com", &content)
 	}
 }
 
@@ -73,7 +74,7 @@ func BenchmarkExtract_JSONLD(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		e := New().SetSyntaxes([]Syntax{SyntaxJSONLD})
-		_, _ = e.Extract("http://example.com", &content)
+		_, _ = e.Extract(context.Background(), "http://example.com", &content)
 	}
 }
 
@@ -83,7 +84,7 @@ func BenchmarkExtract_Microdata(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		e := New().SetSyntaxes([]Syntax{SyntaxMicrodata})
-		_, _ = e.Extract("http://example.com", &content)
+		_, _ = e.Extract(context.Background(), "http://example.com", &content)
 	}
 }
 
@@ -93,7 +94,7 @@ func BenchmarkExtract_RDFa(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		e := New().SetSyntaxes([]Syntax{SyntaxRDFa})
-		_, _ = e.Extract("http://example.com", &content)
+		_, _ = e.Extract(context.Background(), "http://example.com", &content)
 	}
 }
 
@@ -103,7 +104,7 @@ func BenchmarkExtract_DublinCore(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		e := New().SetSyntaxes([]Syntax{SyntaxDublinCore})
-		_, _ = e.Extract("http://example.com", &content)
+		_, _ = e.Extract(context.Background(), "http://example.com", &content)
 	}
 }
 
@@ -113,7 +114,7 @@ func BenchmarkExtract_Microformats(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		e := New().SetSyntaxes([]Syntax{SyntaxMicroformats})
-		_, _ = e.Extract("http://example.com", &content)
+		_, _ = e.Extract(context.Background(), "http://example.com", &content)
 	}
 }
 
@@ -123,6 +124,6 @@ func BenchmarkExtract_AllSyntaxes(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		e := New()
-		_, _ = e.Extract("http://example.com", &content)
+		_, _ = e.Extract(context.Background(), "http://example.com", &content)
 	}
 }

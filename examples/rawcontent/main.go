@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -21,7 +22,7 @@ func main() {
 </html>`
 
 	e := extract.New()
-	em, err := e.Extract(url, &content)
+	em, err := e.Extract(context.Background(), url, &content)
 	if err != nil {
 		log.Fatalf("extraction failed: %v", err)
 	}

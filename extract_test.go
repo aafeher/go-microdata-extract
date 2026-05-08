@@ -2,6 +2,7 @@ package extract
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,7 +36,7 @@ func TestExtractor_setConfigDefaults(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			test.e.setConfigDefaults()
 
-			if !areSyntaxSlicesEqual(test.e.cfg.syntaxes, test.want.syntaxes) || test.e.cfg.userAgent != test.want.userAgent || test.e.cfg.fetchTimeout != test.want.fetchTimeout {
+			if !areSyntaxSlicesEqual(test.e.cfg.syntaxes, test.want.syntaxes) || test.e.cfg.userAgent != test.want.userAgent || test.e.cfg.fetchTimeout != test.want.fetchTimeout || test.e.cfg.httpClient != test.want.httpClient {
 				t.Errorf("expected %v, got %v", test.want, test.e.cfg)
 			}
 		})
@@ -156,9 +157,9 @@ func TestExtractor_Extract(t *testing.T) {
 			name:      "testServer index page",
 			url:       server.URL,
 			content:   nil,
-			err:       pointerOfString("received HTTP status 404"),
+			err:       pointerOfString(fmt.Sprintf("fetch %q: received HTTP status 404", server.URL)),
 			extracted: map[Syntax]any{},
-			errs:      []error{errors.New("received HTTP status 404")},
+			errs:      []error{&FetchError{URL: server.URL, Err: fmt.Errorf("received HTTP status 404")}},
 		},
 		{
 			name:    "page with no structured data",
@@ -1581,7 +1582,7 @@ func TestExtractor_Extract(t *testing.T) {
 				"microformats": []extract.MicroformatItem(nil),
 			},
 			errs: []error{
-				func() error {
+				&ParseError{Syntax: SyntaxJSONLD, Err: func() error {
 					var jsonData []map[string]any
 					jsonLD := `[
         {
@@ -1594,8 +1595,8 @@ func TestExtractor_Extract(t *testing.T) {
 						return err
 					}
 					return nil
-				}(),
-				func() error {
+				}()},
+				&ParseError{Syntax: SyntaxJSONLD, Err: func() error {
 					var jsonData []map[string]any
 					jsonLD := `{
         "@context": "https://schema.org",
@@ -1606,7 +1607,7 @@ func TestExtractor_Extract(t *testing.T) {
 						return err
 					}
 					return nil
-				}(),
+				}()},
 			},
 		},
 		{
@@ -2308,7 +2309,7 @@ func TestExtractor_Extract(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			e := New()
-			e, err := e.Extract(test.url, test.content)
+			e, err := e.Extract(context.Background(), test.url, test.content)
 			if err != nil {
 				if err.Error() != *test.err {
 					t.Errorf("Unexpected error: %v", err)
@@ -2380,13 +2381,13 @@ func TestExtractor_setContent(t *testing.T) {
 			},
 			attrURLContent: nil,
 			wantURLContent: "",
-			wantErr:        fmt.Errorf("received HTTP status 404"),
+			wantErr:        &FetchError{URL: fmt.Sprintf("%s/404", server.URL), Err: fmt.Errorf("received HTTP status 404")},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			s := test.setup()
-			retURLContent, err := s.setContent(test.attrURLContent)
+			retURLContent, err := s.setContent(context.Background(), test.attrURLContent)
 			if retURLContent != test.wantURLContent {
 				t.Errorf("unexpected urlContent: got %v, want %v", retURLContent, test.wantURLContent)
 			}
@@ -2453,7 +2454,7 @@ func TestExtractor_fetch(t *testing.T) {
 			e := &Extractor{
 				cfg: test.fields.cfg,
 			}
-			_, err := e.fetch(test.url)
+			_, err := e.fetch(context.Background(), test.url)
 			if (err != nil) != test.wantErr {
 				t.Errorf("fetch() error = %v, wantErr %v", err, test.wantErr)
 				return
@@ -2465,7 +2466,7 @@ func TestExtractor_fetch(t *testing.T) {
 func TestExtractor_fetch_NewRequestError(t *testing.T) {
 	e := New()
 
-	_, err := e.fetch("://invalid-url")
+	_, err := e.fetch(context.Background(), "://invalid-url")
 	if err == nil {
 		t.Error("expected error for invalid URL but got none")
 	}
@@ -2493,7 +2494,7 @@ func TestExtractor_fetch_IOCopyError(t *testing.T) {
 	e := New()
 	e.SetFetchTimeout(1)
 
-	_, err := e.fetch(server.URL)
+	_, err := e.fetch(context.Background(), server.URL)
 	if err == nil {
 		t.Error("expected io.Copy error but got none")
 	}
@@ -3048,4 +3049,110 @@ func areSyntaxSlicesEqual(slice1, slice2 []Syntax) bool {
 	}
 
 	return true
+}
+
+func TestFetchError_Error(t *testing.T) {
+	fe := &FetchError{URL: "http://example.com", Err: fmt.Errorf("timeout")}
+	want := `fetch "http://example.com": timeout`
+	if fe.Error() != want {
+		t.Errorf("FetchError.Error() = %q; want %q", fe.Error(), want)
+	}
+}
+
+func TestFetchError_Unwrap(t *testing.T) {
+	inner := fmt.Errorf("inner error")
+	fe := &FetchError{URL: "http://example.com", Err: inner}
+	if fe.Unwrap() != inner {
+		t.Errorf("FetchError.Unwrap() = %v; want %v", fe.Unwrap(), inner)
+	}
+}
+
+func TestParseError_Error(t *testing.T) {
+	pe := &ParseError{Syntax: SyntaxOpenGraph, Err: fmt.Errorf("bad html")}
+	want := `parse "opengraph": bad html`
+	if pe.Error() != want {
+		t.Errorf("ParseError.Error() = %q; want %q", pe.Error(), want)
+	}
+}
+
+func TestParseError_Unwrap(t *testing.T) {
+	inner := fmt.Errorf("inner parse error")
+	pe := &ParseError{Syntax: SyntaxJSONLD, Err: inner}
+	if pe.Unwrap() != inner {
+		t.Errorf("ParseError.Unwrap() = %v; want %v", pe.Unwrap(), inner)
+	}
+}
+
+func TestWrapParseErrors_Empty(t *testing.T) {
+	if got := wrapParseErrors(SyntaxOpenGraph, nil); got != nil {
+		t.Errorf("wrapParseErrors(nil) = %v; want nil", got)
+	}
+	if got := wrapParseErrors(SyntaxOpenGraph, []error{}); got != nil {
+		t.Errorf("wrapParseErrors([]) = %v; want nil", got)
+	}
+}
+
+func TestWrapParseErrors_NonEmpty(t *testing.T) {
+	inner := fmt.Errorf("parse failure")
+	wrapped := wrapParseErrors(SyntaxXCards, []error{inner})
+	if len(wrapped) != 1 {
+		t.Fatalf("expected 1 wrapped error, got %d", len(wrapped))
+	}
+	var pe *ParseError
+	if !errors.As(wrapped[0], &pe) {
+		t.Fatalf("expected *ParseError, got %T", wrapped[0])
+	}
+	if pe.Syntax != SyntaxXCards {
+		t.Errorf("Syntax = %q; want %q", pe.Syntax, SyntaxXCards)
+	}
+	if pe.Err != inner {
+		t.Errorf("Err = %v; want %v", pe.Err, inner)
+	}
+}
+
+func TestExtractor_SetHTTPClient(t *testing.T) {
+	e := New()
+	if e.cfg.httpClient != nil {
+		t.Fatal("expected nil httpClient by default")
+	}
+	client := &http.Client{Timeout: 10 * time.Second}
+	e.SetHTTPClient(client)
+	if e.cfg.httpClient != client {
+		t.Error("expected custom http.Client to be stored")
+	}
+}
+
+func TestExtractor_fetch_WithCustomHTTPClient(t *testing.T) {
+	server := testServer()
+	defer server.Close()
+
+	customClient := &http.Client{Timeout: 5 * time.Second}
+	e := New()
+	e.SetHTTPClient(customClient)
+
+	content, err := e.fetch(context.Background(), fmt.Sprintf("%s/test-01-opengraph-minimal.html", server.URL))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(content) == 0 {
+		t.Error("expected non-empty content from custom client fetch")
+	}
+}
+
+func TestExtractor_Extract_ContextCanceled(t *testing.T) {
+	server := testServer()
+	defer server.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	e := New()
+	_, err := e.Extract(ctx, fmt.Sprintf("%s/test-01-opengraph-minimal.html", server.URL), nil)
+	if err == nil {
+		t.Fatal("expected error for cancelled context, got nil")
+	}
+	var fe *FetchError
+	if !errors.As(err, &fe) {
+		t.Errorf("expected *FetchError, got %T: %v", err, err)
+	}
 }

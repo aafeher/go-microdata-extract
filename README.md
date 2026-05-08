@@ -54,6 +54,7 @@ e := extract.New()
 - syntaxes: `[]Syntax{extract.SyntaxOpenGraph, extract.SyntaxXCards, extract.SyntaxJSONLD, extract.SyntaxMicrodata, extract.SyntaxRDFa, extract.SyntaxDublinCore, extract.SyntaxMicroformats}`
 - userAgent: `"go-microdata-extract (+https://github.com/aafeher/go-microdata-extract/blob/main/README.md)"`
 - fetchTimeout: `3` seconds
+- httpClient: `nil` (a default `http.Client` is created from `fetchTimeout` on each request)
 
 ### Overwrite defaults
 
@@ -97,34 +98,63 @@ e = e.SetFetchTimeout(10)
 e := extract.New().SetFetchTimeout(10)
 ```
 
+#### Custom HTTP client
+
+To inject a fully custom `*http.Client` (e.g. with a custom transport, proxy, or mutual TLS), use `SetHTTPClient()`.
+When a custom client is set, `fetchTimeout` is ignored — the client's own timeout applies.
+
+```go
+e := extract.New().SetHTTPClient(&http.Client{
+    Timeout: 10 * time.Second,
+})
+```
+
 #### Chaining methods
 
 In both cases, the functions return a pointer to the main object of the package, allowing you to chain these setting methods in a fluent interface style:
 
 ```go
-e := extract.New()
-     .SetSyntaxes([]Syntax{extract.SyntaxOpenGraph, extract.SyntaxJSONLD})
-     .SetUserAgent("YourUserAgent")
-     .SetFetchTimeout(10)
+e := extract.New().
+    SetSyntaxes([]Syntax{extract.SyntaxOpenGraph, extract.SyntaxJSONLD}).
+    SetUserAgent("YourUserAgent").
+    SetFetchTimeout(10)
 ```
 
 ### Extract
 
 Once you have properly initialized and configured your instance, you can extract structured data using the `Extract()` function.
 
-The `Extract()` function takes in two parameters:
+The `Extract()` function takes three parameters:
 
+- `ctx`: a `context.Context` for cancellation and timeout control of the HTTP fetch,
 - `url`: the URL of the webpage,
 - `urlContent`: an optional string pointer for the content of the URL
 
-If you wish to provide the content yourself, pass the content as the second parameter. If not, simply pass nil and the function will fetch the content on its own.
+If you wish to provide the content yourself, pass it as the third parameter. If not, pass `nil` and the function will fetch the content on its own.
 The `Extract()` function performs concurrent extracting and fetching optimized by the use of Go's goroutines and sync package, ensuring efficient structured data handling.
 
 ```go
-e, err := e.Extract("https://github.com/aafeher/go-microdata-extract", nil)
+e, err := e.Extract(context.Background(), "https://github.com/aafeher/go-microdata-extract", nil)
 ```
 
-In this example, structured data is extracted from "https://github.com/aafeher/go-microdata-extract". The function fetches the content itself, as we passed nil as the urlContent.
+In this example, structured data is extracted from `"https://github.com/aafeher/go-microdata-extract"`. The function fetches the content itself, as we passed `nil` as `urlContent`.
+
+### Error handling
+
+`Extract()` returns a `*FetchError` when the HTTP fetch step fails (network error or non-200 status). Use `errors.As` to distinguish fetch failures from parse failures:
+
+```go
+ctx := context.Background()
+e, err := extract.New().Extract(ctx, "https://example.com", nil)
+if err != nil {
+    var fe *extract.FetchError
+    if errors.As(err, &fe) {
+        fmt.Printf("fetch failed for %s: %v\n", fe.URL, fe.Err)
+    }
+}
+```
+
+Per-extractor parse errors are wrapped in `*ParseError` (tagged with the producing syntax) and accumulated in the extractor's internal error list. They do not cause `Extract()` to return early.
 
 ## Performance
 

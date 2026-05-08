@@ -2,6 +2,7 @@ package extract
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	extractor "github.com/aafeher/go-microdata-extract/extractors"
@@ -10,6 +11,24 @@ import (
 	"sync"
 	"time"
 )
+
+// FetchError is returned when the HTTP fetch step fails (network error or non-200 status).
+type FetchError struct {
+	URL string
+	Err error
+}
+
+func (e *FetchError) Error() string { return fmt.Sprintf("fetch %q: %s", e.URL, e.Err) }
+func (e *FetchError) Unwrap() error { return e.Err }
+
+// ParseError wraps a parser error together with the syntax that produced it.
+type ParseError struct {
+	Syntax Syntax
+	Err    error
+}
+
+func (e *ParseError) Error() string { return fmt.Sprintf("parse %q: %s", e.Syntax, e.Err) }
+func (e *ParseError) Unwrap() error { return e.Err }
 
 type (
 	// Extractor is a struct used for extracting metadata from web content or a provided URL. It utilizes various processors.
@@ -26,6 +45,7 @@ type (
 		syntaxes     []Syntax
 		userAgent    string
 		fetchTimeout uint8
+		httpClient   *http.Client
 	}
 
 	// Processor represents a data structure to hold a processor's name and function for extracting metadata.
@@ -124,16 +144,26 @@ func (e *Extractor) SetFetchTimeout(fetchTimeout uint8) *Extractor {
 	return e
 }
 
+// SetHTTPClient injects a custom HTTP client to use for all fetch operations.
+// When set, the client's own timeout and transport are used instead of the fetchTimeout setting.
+// Returns the updated Extractor instance.
+func (e *Extractor) SetHTTPClient(client *http.Client) *Extractor {
+	e.cfg.httpClient = client
+
+	return e
+}
+
 // Extract retrieves metadata from the specified URL or provided content and processes it using various parsers.
+// ctx: A context for cancellation and timeout control of the HTTP fetch.
 // url: The URL to extract metadata from.
 // urlContent: Optional pointer to a string containing HTML content. If nil, the content at the URL will be fetched.
-func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) {
+func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string) (*Extractor, error) {
 	var err error
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 
 	e.url = url
-	e.content, err = e.setContent(urlContent)
+	e.content, err = e.setContent(ctx, urlContent)
 	if err != nil {
 		e.errs = append(e.errs, err)
 		return e, err
@@ -219,7 +249,7 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 
 			mu.Lock()
 			defer mu.Unlock()
-			e.errs = append(e.errs, errorsExtracted...)
+			e.errs = append(e.errs, wrapParseErrors(proc.Name, errorsExtracted)...)
 			e.extracted[proc.Name] = extracted
 		}(proc)
 	}
@@ -230,11 +260,11 @@ func (e *Extractor) Extract(url string, urlContent *string) (*Extractor, error) 
 }
 
 // setContent sets the content for the Extractor, fetching from URL if necessary. Returns the content or an error.
-func (e *Extractor) setContent(urlContent *string) (string, error) {
+func (e *Extractor) setContent(ctx context.Context, urlContent *string) (string, error) {
 	if urlContent != nil {
 		return *urlContent, nil
 	}
-	mainURLContent, err := e.fetch(e.url)
+	mainURLContent, err := e.fetch(ctx, e.url)
 
 	if err != nil {
 		return "", err
@@ -242,27 +272,31 @@ func (e *Extractor) setContent(urlContent *string) (string, error) {
 	return string(mainURLContent), nil
 }
 
-// fetch retrieves the content from the specified URL. Returns the fetched content as a byte slice or an error if failed.
-func (e *Extractor) fetch(url string) ([]byte, error) {
+// fetch retrieves the content from the specified URL using the provided context. Returns the fetched content as a byte slice or an error if failed.
+func (e *Extractor) fetch(ctx context.Context, url string) ([]byte, error) {
 	var body bytes.Buffer
 
-	client := &http.Client{
-		Timeout: time.Duration(e.cfg.fetchTimeout) * time.Second,
+	client := e.cfg.httpClient
+	if client == nil {
+		client = &http.Client{
+			Timeout: time.Duration(e.cfg.fetchTimeout) * time.Second,
+		}
 	}
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, &FetchError{URL: url, Err: err}
 	}
 
 	req.Header.Set("User-Agent", e.cfg.userAgent)
 
 	response, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, &FetchError{URL: url, Err: err}
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("received HTTP status %d", response.StatusCode)
+		return nil, &FetchError{URL: url, Err: fmt.Errorf("received HTTP status %d", response.StatusCode)}
 	}
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
@@ -270,10 +304,23 @@ func (e *Extractor) fetch(url string) ([]byte, error) {
 
 	_, err = io.Copy(&body, response.Body)
 	if err != nil {
-		return nil, err
+		return nil, &FetchError{URL: url, Err: err}
 	}
 
 	return body.Bytes(), nil
+}
+
+// wrapParseErrors wraps each error in a ParseError tagged with the given syntax.
+// Returns nil when errs is empty, preserving nil e.errs for callers that check len.
+func wrapParseErrors(syntax Syntax, errs []error) []error {
+	if len(errs) == 0 {
+		return nil
+	}
+	wrapped := make([]error, len(errs))
+	for i, err := range errs {
+		wrapped[i] = &ParseError{Syntax: syntax, Err: err}
+	}
+	return wrapped
 }
 
 // GetExtracted returns the extracted metadata as a map by processor name from the Extractor instance.

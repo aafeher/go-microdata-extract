@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/aafeher/go-microdata-extract"
 	extractor "github.com/aafeher/go-microdata-extract/extractors"
@@ -11,7 +12,7 @@ func main() {
 	url := "https://github.com/aafeher/go-microdata-extract"
 
 	e := extract.New()
-	em, err := e.Extract(url, nil)
+	em, err := e.Extract(context.Background(), url, nil)
 	if err != nil {
 		log.Printf("%v", err)
 	}
