@@ -60,6 +60,12 @@ e := extract.New()
 
 #### Syntaxes
 
+To retrieve the full list of supported syntaxes, use `DefaultSyntaxes()`:
+
+```go
+syntaxes := extract.DefaultSyntaxes() // []Syntax — safe copy, mutation does not affect New()
+```
+
 To set the syntaxes whose results you want to retrieve after processing, use the `SetSyntaxes()` function.
 
 ```go
@@ -154,7 +160,19 @@ if err != nil {
 }
 ```
 
-Per-extractor parse errors are wrapped in `*ParseError` (tagged with the producing syntax) and accumulated in the extractor's internal error list. They do not cause `Extract()` to return early.
+Per-extractor parse errors are wrapped in `*ParseError` (tagged with the producing syntax) and do not cause `Extract()` to return early. Retrieve them after extraction with `GetErrors()`:
+
+```go
+e, err := extract.New().Extract(ctx, "https://example.com", nil)
+if err == nil {
+    for _, parseErr := range e.GetErrors() {
+        var pe *extract.ParseError
+        if errors.As(parseErr, &pe) {
+            fmt.Printf("parse error in %s: %v\n", pe.Syntax, pe.Err)
+        }
+    }
+}
+```
 
 ## Performance
 

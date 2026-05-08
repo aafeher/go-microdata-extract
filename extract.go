@@ -79,8 +79,15 @@ const (
 	SyntaxMicroformats Syntax = "microformats"
 )
 
-// SYNTAXES defines an array of metadata syntax identifiers supported for parsing.
-var SYNTAXES = []Syntax{SyntaxOpenGraph, SyntaxXCards, SyntaxJSONLD, SyntaxMicrodata, SyntaxRDFa, SyntaxDublinCore, SyntaxMicroformats}
+var defaultSyntaxes = []Syntax{SyntaxOpenGraph, SyntaxXCards, SyntaxJSONLD, SyntaxMicrodata, SyntaxRDFa, SyntaxDublinCore, SyntaxMicroformats}
+
+// DefaultSyntaxes returns a copy of the default syntax list used by New().
+// Callers may iterate over it or pass a subset to SetSyntaxes.
+func DefaultSyntaxes() []Syntax {
+	cp := make([]Syntax, len(defaultSyntaxes))
+	copy(cp, defaultSyntaxes)
+	return cp
+}
 
 // New creates a new instance of Extractor with default configurations and an empty map for extracted data.
 func New() *Extractor {
@@ -96,7 +103,7 @@ func New() *Extractor {
 // setConfigDefaults initializes the Extractor with default configuration settings.
 func (e *Extractor) setConfigDefaults() {
 	e.cfg = config{
-		syntaxes:     SYNTAXES,
+		syntaxes:     defaultSyntaxes,
 		userAgent:    "go-microdata-extract (+https://github.com/aafeher/go-microdata-extract/blob/main/README.md)",
 		fetchTimeout: 3,
 	}
@@ -112,7 +119,7 @@ func (e *Extractor) SetSyntaxes(syntaxes []Syntax) *Extractor {
 
 	syntaxesToSet := make([]Syntax, 0)
 	for _, syntax := range syntaxes {
-		if contains(SYNTAXES, syntax) {
+		if contains(defaultSyntaxes, syntax) {
 			syntaxesToSet = append(syntaxesToSet, syntax)
 		}
 	}

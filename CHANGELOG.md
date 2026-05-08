@@ -10,8 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `GetErrors() []error` method on `Extractor` — exposes the accumulated parse errors from the last `Extract()` call; previously `errs` was a private field with no public getter
 
+### Added
+- `DefaultSyntaxes() []Syntax` function — returns a fresh copy of the default syntax list; safe to iterate or pass to `SetSyntaxes` without risk of mutating the package-level default
+
 ### Changed
 - `Processor` struct unexported to `processor` — it was only used internally by `Extract()` and was never intended as part of the public API
+- `SYNTAXES` exported variable replaced by unexported `defaultSyntaxes`; use `DefaultSyntaxes()` instead — the old `var` allowed callers to mutate the global default, causing subtle cross-call bugs
 
 ## [0.10.0] - 2026-05-08
 

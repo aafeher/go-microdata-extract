@@ -25,7 +25,7 @@ func TestExtractor_setConfigDefaults(t *testing.T) {
 			name: "default config",
 			e:    &Extractor{},
 			want: config{
-				syntaxes:     SYNTAXES,
+				syntaxes:     defaultSyntaxes,
 				userAgent:    "go-microdata-extract (+https://github.com/aafeher/go-microdata-extract/blob/main/README.md)",
 				fetchTimeout: 3,
 			},
@@ -52,12 +52,12 @@ func TestExtractor_SetSyntaxes(t *testing.T) {
 		{
 			name:     "Empty syntax list",
 			syntaxes: []Syntax{},
-			want:     SYNTAXES,
+			want:     defaultSyntaxes,
 		},
 		{
 			name:     "invalid syntax list",
 			syntaxes: []Syntax{"a"},
-			want:     SYNTAXES,
+			want:     defaultSyntaxes,
 		},
 		{
 			name:     "mixed syntax list",
@@ -71,8 +71,8 @@ func TestExtractor_SetSyntaxes(t *testing.T) {
 		},
 		{
 			name:     "full syntax list",
-			syntaxes: SYNTAXES,
-			want:     SYNTAXES,
+			syntaxes: defaultSyntaxes,
+			want:     defaultSyntaxes,
 		},
 	}
 
@@ -2651,6 +2651,17 @@ func TestExtractor_GetErrors(t *testing.T) {
 				t.Errorf("Extractor.GetErrors() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestDefaultSyntaxes(t *testing.T) {
+	got := DefaultSyntaxes()
+	if !reflect.DeepEqual(got, defaultSyntaxes) {
+		t.Errorf("DefaultSyntaxes() = %v, want %v", got, defaultSyntaxes)
+	}
+	got[0] = "mutated"
+	if defaultSyntaxes[0] == "mutated" {
+		t.Error("DefaultSyntaxes() returned a reference to the internal slice, not a copy")
 	}
 }
 

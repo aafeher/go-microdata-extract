@@ -62,7 +62,7 @@ func main() {
 	}
 
 	extracted := em.GetExtracted()
-	for _, syntax := range extract.SYNTAXES {
+	for _, syntax := range extract.DefaultSyntaxes() {
 		if data, ok := extracted[syntax]; !ok || data == nil {
 			fmt.Printf("syntax %q: no data found\n", syntax)
 		} else {
