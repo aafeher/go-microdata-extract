@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `Processor` struct unexported to `processor` — it was only used internally by `Extract()` and was never intended as part of the public API
 - `SYNTAXES` exported variable replaced by unexported `defaultSyntaxes`; use `DefaultSyntaxes()` instead — the old `var` allowed callers to mutate the global default, causing subtle cross-call bugs
+- `FillMissingFieldsFromOpenGraph` in `extractors/xcards.go` unexported to `fillMissingFieldsFromOpenGraph` — it is an internal implementation detail of the XCards extractor; corresponding tests moved from `extract_test.go` to `extractors/xcards_test.go`
 
 ## [0.10.0] - 2026-05-08
 

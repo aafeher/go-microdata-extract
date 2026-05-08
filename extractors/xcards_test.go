@@ -1,6 +1,8 @@
 package extractor
 
 import (
+	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -538,21 +540,21 @@ func TestResolveXCardsURLs(t *testing.T) {
 }
 
 func TestFillMissingFieldsFromOpenGraph_NilTarget(t *testing.T) {
-	errs := FillMissingFieldsFromOpenGraph(nil, &OpenGraph{})
+	errs := fillMissingFieldsFromOpenGraph(nil, &OpenGraph{})
 	if len(errs) == 0 {
 		t.Error("expected error for nil target")
 	}
 }
 
 func TestFillMissingFieldsFromOpenGraph_NilSource(t *testing.T) {
-	errs := FillMissingFieldsFromOpenGraph(&XCards{}, nil)
+	errs := fillMissingFieldsFromOpenGraph(&XCards{}, nil)
 	if len(errs) == 0 {
 		t.Error("expected error for nil source")
 	}
 }
 
 func TestFillMissingFieldsFromOpenGraph_BothNil(t *testing.T) {
-	errs := FillMissingFieldsFromOpenGraph(nil, nil)
+	errs := fillMissingFieldsFromOpenGraph(nil, nil)
 	if len(errs) == 0 {
 		t.Error("expected errors for both nil")
 	}
@@ -561,7 +563,7 @@ func TestFillMissingFieldsFromOpenGraph_BothNil(t *testing.T) {
 func TestFillMissingFieldsFromOpenGraph_StringFieldCopy(t *testing.T) {
 	og := &OpenGraph{Title: "OG Title", Type: "website"}
 	xc := NewXCards()
-	errs := FillMissingFieldsFromOpenGraph(xc, og)
+	errs := fillMissingFieldsFromOpenGraph(xc, og)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -573,7 +575,7 @@ func TestFillMissingFieldsFromOpenGraph_StringFieldCopy(t *testing.T) {
 func TestFillMissingFieldsFromOpenGraph_StringFieldNoOverwrite(t *testing.T) {
 	og := &OpenGraph{Title: "OG Title"}
 	xc := &XCards{Title: "XC Title"}
-	FillMissingFieldsFromOpenGraph(xc, og)
+	fillMissingFieldsFromOpenGraph(xc, og)
 	if xc.Title != "XC Title" {
 		t.Errorf("Title should not be overwritten: %q", xc.Title)
 	}
@@ -585,7 +587,7 @@ func TestFillMissingFieldsFromOpenGraph_PtrFieldCopy(t *testing.T) {
 		Article: &Article{Section: "Technology"},
 	}
 	xc := NewXCards()
-	FillMissingFieldsFromOpenGraph(xc, og)
+	fillMissingFieldsFromOpenGraph(xc, og)
 	if xc.Article == nil {
 		t.Fatal("expected Article to be copied")
 	}
@@ -602,7 +604,7 @@ func TestFillMissingFieldsFromOpenGraph_PtrFieldRecurse(t *testing.T) {
 	xc := &XCards{
 		Article: &Article{Section: "Existing"},
 	}
-	FillMissingFieldsFromOpenGraph(xc, og)
+	fillMissingFieldsFromOpenGraph(xc, og)
 	// Section should NOT be overwritten (non-empty)
 	if xc.Article.Section != "Existing" {
 		t.Errorf("Section should not be overwritten: %q", xc.Article.Section)
@@ -619,7 +621,7 @@ func TestFillMissingFieldsFromOpenGraph_SliceFieldCopy(t *testing.T) {
 		OpenGraphImage: []OpenGraphImage{{URL: "/img.jpg"}},
 	}
 	xc := NewXCards()
-	FillMissingFieldsFromOpenGraph(xc, og)
+	fillMissingFieldsFromOpenGraph(xc, og)
 	if len(xc.OpenGraphImage) != 1 {
 		t.Errorf("OpenGraphImage: %v", xc.OpenGraphImage)
 	}
@@ -635,7 +637,7 @@ func TestFillMissingFieldsFromOpenGraph_StructFieldRecurse(t *testing.T) {
 	xc := &XCards{
 		Article: &Article{},
 	}
-	errs := FillMissingFieldsFromOpenGraph(xc, og)
+	errs := fillMissingFieldsFromOpenGraph(xc, og)
 	// The struct branch causes recursion into Article's time.Time fields
 	// which themselves have int/uint64 fields that hit the default:continue branch
 	if len(errs) != 0 {
@@ -647,7 +649,7 @@ func TestFillMissingFieldsFromOpenGraph_StructFieldRecurse(t *testing.T) {
 }
 
 // sourceWithExtra has a field (Extra) not present in targetWithoutExtra.
-// This is used to trigger the !tField.IsValid() → continue path in FillMissingFieldsFromOpenGraph.
+// This is used to trigger the !tField.IsValid() → continue path in fillMissingFieldsFromOpenGraph.
 type sourceWithExtra struct {
 	Name  string
 	Extra string // this field is not in targetWithoutExtra
@@ -661,11 +663,335 @@ func TestFillMissingFieldsFromOpenGraph_FieldNotInTarget(t *testing.T) {
 	// source has field "Extra" that target doesn't have → !tField.IsValid() → continue
 	src := &sourceWithExtra{Name: "source-name", Extra: "extra-value"}
 	tgt := &targetWithoutExtra{}
-	errs := FillMissingFieldsFromOpenGraph(tgt, src)
+	errs := fillMissingFieldsFromOpenGraph(tgt, src)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
 	if tgt.Name != "source-name" {
 		t.Errorf("Name: %q", tgt.Name)
+	}
+}
+
+func TestFillMissingFieldsFromOpenGraph_TableDriven(t *testing.T) {
+	tests := []struct {
+		name           string
+		target         any
+		source         any
+		expectedErrors int
+		expectedResult any
+	}{
+		{
+			name:           "nil target pointer",
+			target:         (*XCards)(nil),
+			source:         &OpenGraph{Title: "Test"},
+			expectedErrors: 1,
+			expectedResult: (*XCards)(nil),
+		},
+		{
+			name:           "nil source pointer",
+			target:         &XCards{},
+			source:         (*OpenGraph)(nil),
+			expectedErrors: 1,
+			expectedResult: &XCards{},
+		},
+		{
+			name:           "target is not a pointer",
+			target:         XCards{},
+			source:         &OpenGraph{Title: "Test"},
+			expectedErrors: 1,
+			expectedResult: XCards{},
+		},
+		{
+			name:           "source is not a pointer",
+			target:         &XCards{},
+			source:         OpenGraph{Title: "Test"},
+			expectedErrors: 1,
+			expectedResult: &XCards{},
+		},
+		{
+			name:           "both nil pointers",
+			target:         (*XCards)(nil),
+			source:         (*OpenGraph)(nil),
+			expectedErrors: 2,
+			expectedResult: (*XCards)(nil),
+		},
+		{
+			name: "fill missing string fields",
+			target: &XCards{
+				Title: "",
+				Type:  "existing",
+			},
+			source: &OpenGraph{
+				Title: "New Title",
+				Type:  "should not override",
+				URL:   "https://example.com",
+			},
+			expectedErrors: 0,
+			expectedResult: &XCards{
+				Title: "New Title",
+				Type:  "existing",
+				URL:   "https://example.com",
+			},
+		},
+		{
+			name: "fill missing slice fields",
+			target: &XCards{
+				OpenGraphImage: nil,
+			},
+			source: &OpenGraph{
+				OpenGraphImage: []OpenGraphImage{
+					{URL: "https://example.com/image.jpg"},
+				},
+			},
+			expectedErrors: 0,
+			expectedResult: &XCards{
+				OpenGraphImage: []OpenGraphImage{
+					{URL: "https://example.com/image.jpg"},
+				},
+			},
+		},
+		{
+			name: "do not override existing slices",
+			target: &XCards{
+				OpenGraphImage: []OpenGraphImage{
+					{URL: "existing.jpg"},
+				},
+			},
+			source: &OpenGraph{
+				OpenGraphImage: []OpenGraphImage{
+					{URL: "new.jpg"},
+				},
+			},
+			expectedErrors: 0,
+			expectedResult: &XCards{
+				OpenGraphImage: []OpenGraphImage{
+					{URL: "existing.jpg"},
+				},
+			},
+		},
+		{
+			name: "fill nil pointer fields",
+			target: &XCards{
+				Music: nil,
+			},
+			source: &OpenGraph{
+				Music: &Music{
+					Duration: 180,
+					Album:    "Test Album",
+				},
+			},
+			expectedErrors: 0,
+			expectedResult: &XCards{
+				Music: &Music{
+					Duration: 180,
+					Album:    "Test Album",
+				},
+			},
+		},
+		{
+			name: "recursive fill for nested pointer structs",
+			target: &XCards{
+				Music: &Music{
+					Duration: 120,
+					Album:    "",
+				},
+			},
+			source: &OpenGraph{
+				Music: &Music{
+					Duration: 180,
+					Album:    "New Album",
+					Musician: []string{"Artist 1"},
+				},
+			},
+			expectedErrors: 0,
+			expectedResult: &XCards{
+				Music: &Music{
+					Duration: 120,
+					Album:    "New Album",
+					Musician: []string{"Artist 1"},
+				},
+			},
+		},
+		{
+			name: "recursive fill with nested nil source",
+			target: &XCards{
+				Music: &Music{
+					Duration: 120,
+				},
+			},
+			source: &OpenGraph{
+				Music: nil,
+			},
+			expectedErrors: 0,
+			expectedResult: &XCards{
+				Music: &Music{
+					Duration: 120,
+				},
+			},
+		},
+		{
+			name: "recursive fill with both nested structs non-nil",
+			target: &XCards{
+				Video: &Video{
+					Duration: 300,
+					Series:   "",
+				},
+			},
+			source: &OpenGraph{
+				Video: &Video{
+					Duration: 400,
+					Series:   "Test Series",
+					Director: []string{"Director 1"},
+				},
+			},
+			expectedErrors: 0,
+			expectedResult: &XCards{
+				Video: &Video{
+					Duration: 300,
+					Series:   "Test Series",
+					Director: []string{"Director 1"},
+				},
+			},
+		},
+		{
+			name:           "empty source with empty target",
+			target:         &XCards{},
+			source:         &OpenGraph{},
+			expectedErrors: 0,
+			expectedResult: &XCards{},
+		},
+		{
+			name: "source with fields not in target",
+			target: &XCards{
+				Title: "",
+			},
+			source: &OpenGraph{
+				Title:       "Test Title",
+				Description: "Test Description",
+			},
+			expectedErrors: 0,
+			expectedResult: &XCards{
+				Title:       "Test Title",
+				Description: "Test Description",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			errs := fillMissingFieldsFromOpenGraph(test.target, test.source)
+
+			if len(errs) != test.expectedErrors {
+				t.Errorf("expected %d errors, got %d: %v", test.expectedErrors, len(errs), errs)
+			}
+
+			if test.expectedErrors == 0 && test.target != nil {
+				if !reflect.DeepEqual(test.target, test.expectedResult) {
+					t.Errorf("expected %+v, got %+v", test.expectedResult, test.target)
+				}
+			}
+		})
+	}
+}
+
+func TestFillMissingFieldsFromOpenGraph_InvalidFieldSkip(t *testing.T) {
+	type Target struct {
+		A string
+	}
+
+	type Source struct {
+		A string
+		B string
+	}
+
+	target := &Target{A: ""}
+	source := &Source{A: "value", B: "should be skipped"}
+
+	errs := fillMissingFieldsFromOpenGraph(target, source)
+
+	if len(errs) != 0 {
+		t.Errorf("Expected no errors, got %v", errs)
+	}
+	if target.A != "value" {
+		t.Errorf("Expected A to be 'value', got '%s'", target.A)
+	}
+}
+
+func TestFillMissingFieldsFromOpenGraph_ErrorMessages(t *testing.T) {
+	tests := []struct {
+		name           string
+		target         any
+		source         any
+		expectedErrMsg string
+	}{
+		{
+			name:           "nil target error message",
+			target:         (*XCards)(nil),
+			source:         &OpenGraph{},
+			expectedErrMsg: "target must be a non-nil pointer to a struct",
+		},
+		{
+			name:           "nil source error message",
+			target:         &XCards{},
+			source:         (*OpenGraph)(nil),
+			expectedErrMsg: "source must be a non-nil pointer to a struct",
+		},
+		{
+			name:           "non-pointer target error message",
+			target:         XCards{},
+			source:         &OpenGraph{},
+			expectedErrMsg: "target must be a non-nil pointer to a struct",
+		},
+		{
+			name:           "non-pointer source error message",
+			target:         &XCards{},
+			source:         OpenGraph{},
+			expectedErrMsg: "source must be a non-nil pointer to a struct",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			errs := fillMissingFieldsFromOpenGraph(test.target, test.source)
+
+			if len(errs) == 0 {
+				t.Errorf("expected error, got none")
+				return
+			}
+
+			found := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), test.expectedErrMsg) {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				t.Errorf("expected error message containing '%s', got errors: %v", test.expectedErrMsg, errs)
+			}
+		})
+	}
+}
+
+func TestFillMissingFieldsFromOpenGraph_RecursiveErrorPropagation(t *testing.T) {
+	target := &XCards{
+		Music: &Music{},
+	}
+
+	source := &OpenGraph{
+		Music: &Music{
+			Album: "Test Album",
+		},
+	}
+
+	errs := fillMissingFieldsFromOpenGraph(target, source)
+
+	if len(errs) != 0 {
+		t.Errorf("unexpected errors: %v", errs)
+	}
+
+	if target.Music.Album != "Test Album" {
+		t.Errorf("expected Album to be filled, got %s", target.Music.Album)
 	}
 }

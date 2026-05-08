@@ -89,7 +89,7 @@ func ParseXCards(URL string, htmlContent string) (*XCards, []error) {
 		if itemXCards == nil {
 			itemXCards = &XCards{}
 		}
-		errorsFillMissing := FillMissingFieldsFromOpenGraph(itemXCards, itemOpenGraph)
+		errorsFillMissing := fillMissingFieldsFromOpenGraph(itemXCards, itemOpenGraph)
 		errorsXCards = append(errorsXCards, errorsFillMissing...)
 	}
 
@@ -290,8 +290,8 @@ func handleXCardsAudioProperty(xc *XCards, parts []string, content string) {
 	})
 }
 
-// FillMissingFieldsFromOpenGraph fills missing fields in the target struct with values from the source struct.
-func FillMissingFieldsFromOpenGraph(target, source any) []error {
+// fillMissingFieldsFromOpenGraph fills missing fields in the target struct with values from the source struct.
+func fillMissingFieldsFromOpenGraph(target, source any) []error {
 	var errors []error
 
 	// Check that both target and source are non-nil pointers to structs
@@ -332,7 +332,7 @@ func FillMissingFieldsFromOpenGraph(target, source any) []error {
 			if tField.IsNil() && !sField.IsNil() {
 				tField.Set(sField)
 			} else if !tField.IsNil() && !sField.IsNil() {
-				errs := FillMissingFieldsFromOpenGraph(tField.Interface(), sField.Interface())
+				errs := fillMissingFieldsFromOpenGraph(tField.Interface(), sField.Interface())
 				errors = append(errors, errs...)
 			}
 		case reflect.Slice:
@@ -340,7 +340,7 @@ func FillMissingFieldsFromOpenGraph(target, source any) []error {
 				tField.Set(sField)
 			}
 		case reflect.Struct:
-			errs := FillMissingFieldsFromOpenGraph(tField.Addr().Interface(), sField.Addr().Interface())
+			errs := fillMissingFieldsFromOpenGraph(tField.Addr().Interface(), sField.Addr().Interface())
 			errors = append(errors, errs...)
 		default:
 			continue
