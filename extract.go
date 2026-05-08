@@ -48,8 +48,7 @@ type (
 		httpClient   *http.Client
 	}
 
-	// Processor represents a data structure to hold a processor's name and function for extracting metadata.
-	Processor struct {
+	processor struct {
 		Name Syntax
 		Func func() (any, []error)
 	}
@@ -169,10 +168,10 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		return e, err
 	}
 
-	var processors []Processor
+	var processors []processor
 
 	if contains(e.cfg.syntaxes, SyntaxOpenGraph) {
-		processors = append(processors, Processor{
+		processors = append(processors, processor{
 			Name: SyntaxOpenGraph,
 			Func: func() (any, []error) {
 				result, errs := extractor.ParseOpenGraph(e.url, e.content)
@@ -184,7 +183,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		})
 	}
 	if contains(e.cfg.syntaxes, SyntaxXCards) {
-		processors = append(processors, Processor{
+		processors = append(processors, processor{
 			Name: SyntaxXCards,
 			Func: func() (any, []error) {
 				result, errs := extractor.ParseXCards(e.url, e.content)
@@ -196,7 +195,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		})
 	}
 	if contains(e.cfg.syntaxes, SyntaxJSONLD) {
-		processors = append(processors, Processor{
+		processors = append(processors, processor{
 			Name: SyntaxJSONLD,
 			Func: func() (any, []error) {
 				return extractor.JSONLD(e.url, e.content)
@@ -204,7 +203,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		})
 	}
 	if contains(e.cfg.syntaxes, SyntaxMicrodata) {
-		processors = append(processors, Processor{
+		processors = append(processors, processor{
 			Name: SyntaxMicrodata,
 			Func: func() (any, []error) {
 				return extractor.W3CMicrodata(e.url, e.content)
@@ -212,7 +211,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		})
 	}
 	if contains(e.cfg.syntaxes, SyntaxRDFa) {
-		processors = append(processors, Processor{
+		processors = append(processors, processor{
 			Name: SyntaxRDFa,
 			Func: func() (any, []error) {
 				return extractor.RDFa(e.url, e.content)
@@ -220,7 +219,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		})
 	}
 	if contains(e.cfg.syntaxes, SyntaxDublinCore) {
-		processors = append(processors, Processor{
+		processors = append(processors, processor{
 			Name: SyntaxDublinCore,
 			Func: func() (any, []error) {
 				result, errs := extractor.DublinCore(e.url, e.content)
@@ -232,7 +231,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		})
 	}
 	if contains(e.cfg.syntaxes, SyntaxMicroformats) {
-		processors = append(processors, Processor{
+		processors = append(processors, processor{
 			Name: SyntaxMicroformats,
 			Func: func() (any, []error) {
 				return extractor.Microformats(e.url, e.content)
@@ -240,10 +239,9 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		})
 	}
 
-	for _, processor := range processors {
+	for _, proc := range processors {
 		wg.Add(1)
-		proc := processor
-		go func(proc Processor) {
+		go func(proc processor) {
 			defer wg.Done()
 			extracted, errorsExtracted := proc.Func()
 
