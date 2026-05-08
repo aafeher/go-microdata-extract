@@ -328,6 +328,11 @@ func (e *Extractor) GetExtracted() map[Syntax]any {
 	return e.extracted
 }
 
+// GetErrors returns the accumulated parse errors from the last Extract() call.
+func (e *Extractor) GetErrors() []error {
+	return e.errs
+}
+
 // GetExtractedJSON returns the extracted metadata as a JSON-formatted byte array with indentation.
 func (e *Extractor) GetExtractedJSON() json.RawMessage {
 	extractedJSON, errJSON := json.MarshalIndent(e.extracted, "", "  ")

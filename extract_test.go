@@ -2617,6 +2617,43 @@ func TestExtractor_GetExtractedJSON(t *testing.T) {
 	}
 }
 
+func TestExtractor_GetErrors(t *testing.T) {
+	tests := []struct {
+		name  string
+		setup func() *Extractor
+		want  []error
+	}{
+		{
+			name: "nil errs",
+			setup: func() *Extractor {
+				return &Extractor{}
+			},
+			want: nil,
+		},
+		{
+			name: "non-empty errs",
+			setup: func() *Extractor {
+				return &Extractor{
+					errs: []error{
+						&ParseError{Syntax: SyntaxJSONLD, Err: fmt.Errorf("bad json")},
+					},
+				}
+			},
+			want: []error{
+				&ParseError{Syntax: SyntaxJSONLD, Err: fmt.Errorf("bad json")},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := tt.setup()
+			if got := e.GetErrors(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Extractor.GetErrors() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_index(t *testing.T) {
 	tests := []struct {
 		name string
