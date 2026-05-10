@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	extract "github.com/aafeher/go-microdata-extract/extractors"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
+
+	extract "github.com/aafeher/go-microdata-extract/extractors"
 )
 
 func TestExtractor_setConfigDefaults(t *testing.T) {
@@ -2706,7 +2707,7 @@ func TestConfigError_Error(t *testing.T) {
 func TestConfigError_Unwrap(t *testing.T) {
 	inner := fmt.Errorf("inner")
 	ce := &ConfigError{Field: "maxBodySize", Err: inner}
-	if ce.Unwrap() != inner {
+	if !errors.Is(inner, ce.Unwrap()) {
 		t.Errorf("ConfigError.Unwrap() = %v; want %v", ce.Unwrap(), inner)
 	}
 }
@@ -2769,7 +2770,7 @@ func TestFetchError_Error(t *testing.T) {
 func TestFetchError_Unwrap(t *testing.T) {
 	inner := fmt.Errorf("inner error")
 	fe := &FetchError{URL: "http://example.com", Err: inner}
-	if fe.Unwrap() != inner {
+	if !errors.Is(inner, fe.Unwrap()) {
 		t.Errorf("FetchError.Unwrap() = %v; want %v", fe.Unwrap(), inner)
 	}
 }
@@ -2785,7 +2786,7 @@ func TestParseError_Error(t *testing.T) {
 func TestParseError_Unwrap(t *testing.T) {
 	inner := fmt.Errorf("inner parse error")
 	pe := &ParseError{Syntax: SyntaxJSONLD, Err: inner}
-	if pe.Unwrap() != inner {
+	if !errors.Is(inner, pe.Unwrap()) {
 		t.Errorf("ParseError.Unwrap() = %v; want %v", pe.Unwrap(), inner)
 	}
 }
@@ -2812,7 +2813,7 @@ func TestWrapParseErrors_NonEmpty(t *testing.T) {
 	if pe.Syntax != SyntaxXCards {
 		t.Errorf("Syntax = %q; want %q", pe.Syntax, SyntaxXCards)
 	}
-	if pe.Err != inner {
+	if !errors.Is(inner, pe.Err) {
 		t.Errorf("Err = %v; want %v", pe.Err, inner)
 	}
 }
@@ -2877,7 +2878,7 @@ func TestExtractor_SetMaxBodySize(t *testing.T) {
 
 func TestExtractor_fetch_BodySizeLimitExceeded(t *testing.T) {
 	const limit int64 = 100
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(bytes.Repeat([]byte("x"), int(limit)+1))
 	}))
@@ -2955,7 +2956,7 @@ func TestExtractor_GetMaxBodySize(t *testing.T) {
 
 func TestExtractor_fetch_BodySizeLimitNotExceeded(t *testing.T) {
 	const limit int64 = 100
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(bytes.Repeat([]byte("x"), int(limit)))
 	}))
