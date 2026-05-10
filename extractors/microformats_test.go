@@ -333,7 +333,7 @@ func TestMfURLValue_AllBranches(t *testing.T) {
 			if node == nil {
 				t.Fatalf("could not find <%s> element", tt.tag)
 			}
-			got := mfURLValue(node)
+			got := mfURLValue(node, "")
 			if got != tt.want {
 				t.Errorf("mfURLValue() = %q; want %q", got, tt.want)
 			}
@@ -436,7 +436,7 @@ func TestMfInnerText(t *testing.T) {
 }
 
 func TestParseMicroformatsFrom_ErrReader(t *testing.T) {
-	items, errs := parseMicroformatsFrom(errReader{})
+	items, errs := parseMicroformatsFrom("", errReader{})
 	if len(errs) == 0 {
 		t.Error("expected error from errReader")
 	}
@@ -483,5 +483,31 @@ func TestFilterPrefix(t *testing.T) {
 	none := filterPrefix(tokens, "dt-")
 	if len(none) != 0 {
 		t.Errorf("expected 0 dt- classes, got %v", none)
+	}
+}
+
+func TestMicroformats_RelativeURLResolution(t *testing.T) {
+	const base = "http://example.com"
+	htmlStr := `<html><body>
+		<div class="h-card">
+			<a class="u-url" href="/profile">Profile</a>
+			<img class="u-photo" src="/photo.jpg">
+		</div>
+	</body></html>`
+
+	items, errs := Microformats(base, htmlStr)
+	if len(errs) != 0 {
+		t.Fatalf("unexpected errors: %v", errs)
+	}
+	if len(items) == 0 {
+		t.Fatal("expected at least 1 item")
+	}
+	item := items[0]
+
+	if v, _ := item.Properties["u-url"].(string); v != "http://example.com/profile" {
+		t.Errorf("u-url: %q", v)
+	}
+	if v, _ := item.Properties["u-photo"].(string); v != "http://example.com/photo.jpg" {
+		t.Errorf("u-photo: %q", v)
 	}
 }

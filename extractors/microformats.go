@@ -14,47 +14,47 @@ type MicroformatItem struct {
 }
 
 // Microformats extracts Microformats2 structured data from HTML content.
-func Microformats(_ string, htmlContent string) ([]MicroformatItem, []error) {
-	return parseMicroformats(htmlContent)
+func Microformats(URL string, htmlContent string) ([]MicroformatItem, []error) {
+	return parseMicroformats(URL, htmlContent)
 }
 
-func parseMicroformats(htmlContent string) ([]MicroformatItem, []error) {
-	return parseMicroformatsFrom(strings.NewReader(htmlContent))
+func parseMicroformats(baseURL, htmlContent string) ([]MicroformatItem, []error) {
+	return parseMicroformatsFrom(baseURL, strings.NewReader(htmlContent))
 }
 
-func parseMicroformatsFrom(r io.Reader) ([]MicroformatItem, []error) {
+func parseMicroformatsFrom(baseURL string, r io.Reader) ([]MicroformatItem, []error) {
 	doc, err := html.Parse(r)
 	if err != nil {
 		return nil, []error{err}
 	}
 	var items []MicroformatItem
-	walkMicroformats(doc, &items)
+	walkMicroformats(doc, baseURL, &items)
 	return items, nil
 }
 
-func walkMicroformats(n *html.Node, items *[]MicroformatItem) {
+func walkMicroformats(n *html.Node, baseURL string, items *[]MicroformatItem) {
 	if n.Type == html.ElementNode {
 		if hClasses := mfRootClasses(n); len(hClasses) > 0 {
-			item := buildMicroformatItem(n, hClasses)
+			item := buildMicroformatItem(n, hClasses, baseURL)
 			*items = append(*items, *item)
 			return
 		}
 	}
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		walkMicroformats(c, items)
+		walkMicroformats(c, baseURL, items)
 	}
 }
 
-func buildMicroformatItem(n *html.Node, hClasses []string) *MicroformatItem {
+func buildMicroformatItem(n *html.Node, hClasses []string, baseURL string) *MicroformatItem {
 	item := &MicroformatItem{
 		Type:       hClasses,
 		Properties: make(map[string]any),
 	}
-	collectMicroformatProperties(n, item)
+	collectMicroformatProperties(n, item, baseURL)
 	return item
 }
 
-func collectMicroformatProperties(n *html.Node, item *MicroformatItem) {
+func collectMicroformatProperties(n *html.Node, item *MicroformatItem, baseURL string) {
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		if c.Type != html.ElementNode {
 			continue
@@ -72,7 +72,7 @@ func collectMicroformatProperties(n *html.Node, item *MicroformatItem) {
 		switch {
 		case isRoot && isProp:
 			// nested item acting as a property value
-			nested := buildMicroformatItem(c, hClasses)
+			nested := buildMicroformatItem(c, hClasses, baseURL)
 			for _, prop := range pClasses {
 				item.Properties[prop] = appendValue(item.Properties[prop], nested)
 			}
@@ -87,14 +87,14 @@ func collectMicroformatProperties(n *html.Node, item *MicroformatItem) {
 			}
 		case isRoot:
 			// child root item → Children
-			nested := buildMicroformatItem(c, hClasses)
+			nested := buildMicroformatItem(c, hClasses, baseURL)
 			item.Children = append(item.Children, nested)
 		default:
 			for _, prop := range pClasses {
 				item.Properties[prop] = appendValue(item.Properties[prop], mfTextValue(c))
 			}
 			for _, prop := range uClasses {
-				item.Properties[prop] = appendValue(item.Properties[prop], mfURLValue(c))
+				item.Properties[prop] = appendValue(item.Properties[prop], mfURLValue(c, baseURL))
 			}
 			for _, prop := range dtClasses {
 				item.Properties[prop] = appendValue(item.Properties[prop], mfDatetimeValue(c))
@@ -102,7 +102,7 @@ func collectMicroformatProperties(n *html.Node, item *MicroformatItem) {
 			for _, prop := range eClasses {
 				item.Properties[prop] = appendValue(item.Properties[prop], mfEmbeddedValue(c))
 			}
-			collectMicroformatProperties(c, item)
+			collectMicroformatProperties(c, item, baseURL)
 		}
 	}
 }
@@ -152,24 +152,24 @@ func mfTextValue(n *html.Node) string {
 	return strings.TrimSpace(mfInnerText(n))
 }
 
-// mfURLValue returns the URL value for a u-* property.
-func mfURLValue(n *html.Node) string {
+// mfURLValue returns the URL value for a u-* property, resolved against baseURL.
+func mfURLValue(n *html.Node, baseURL string) string {
 	switch n.Data {
 	case "a", "area", "link":
 		if v := getAttrVal(n, "href"); v != "" {
-			return v
+			return resolveURL(baseURL, v)
 		}
 	case "img", "video", "audio", "source", "iframe", "embed":
 		if v := getAttrVal(n, "src"); v != "" {
-			return v
+			return resolveURL(baseURL, v)
 		}
 	case "object":
 		if v := getAttrVal(n, "data"); v != "" {
-			return v
+			return resolveURL(baseURL, v)
 		}
 	case "form":
 		if v := getAttrVal(n, "action"); v != "" {
-			return v
+			return resolveURL(baseURL, v)
 		}
 	}
 	return strings.TrimSpace(mfInnerText(n))
