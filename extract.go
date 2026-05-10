@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 )
@@ -292,7 +293,11 @@ func (e *Extractor) setContent(ctx context.Context, urlContent *string) (string,
 }
 
 // fetch retrieves the content from the specified URL using the provided context. Returns the fetched content as a byte slice or an error if failed.
-func (e *Extractor) fetch(ctx context.Context, url string) ([]byte, error) {
+func (e *Extractor) fetch(ctx context.Context, rawURL string) ([]byte, error) {
+	if !strings.HasPrefix(rawURL, "http://") && !strings.HasPrefix(rawURL, "https://") {
+		return nil, &FetchError{URL: rawURL, Err: fmt.Errorf("unsupported URL scheme: only http and https are allowed")}
+	}
+
 	var body bytes.Buffer
 
 	client := e.cfg.httpClient
@@ -302,20 +307,20 @@ func (e *Extractor) fetch(ctx context.Context, url string) ([]byte, error) {
 		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
-		return nil, &FetchError{URL: url, Err: err}
+		return nil, &FetchError{URL: rawURL, Err: err}
 	}
 
 	req.Header.Set("User-Agent", e.cfg.userAgent)
 
 	response, err := client.Do(req)
 	if err != nil {
-		return nil, &FetchError{URL: url, Err: err}
+		return nil, &FetchError{URL: rawURL, Err: err}
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, &FetchError{URL: url, Err: fmt.Errorf("received HTTP status %d", response.StatusCode)}
+		return nil, &FetchError{URL: rawURL, Err: fmt.Errorf("received HTTP status %d", response.StatusCode)}
 	}
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
@@ -323,10 +328,10 @@ func (e *Extractor) fetch(ctx context.Context, url string) ([]byte, error) {
 
 	_, err = io.Copy(&body, io.LimitReader(response.Body, e.cfg.maxBodySize+1))
 	if err != nil {
-		return nil, &FetchError{URL: url, Err: err}
+		return nil, &FetchError{URL: rawURL, Err: err}
 	}
 	if int64(body.Len()) > e.cfg.maxBodySize {
-		return nil, &FetchError{URL: url, Err: fmt.Errorf("response body exceeds limit of %d bytes", e.cfg.maxBodySize)}
+		return nil, &FetchError{URL: rawURL, Err: fmt.Errorf("response body exceeds limit of %d bytes", e.cfg.maxBodySize)}
 	}
 
 	return body.Bytes(), nil

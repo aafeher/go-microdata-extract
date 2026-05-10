@@ -2431,6 +2431,18 @@ func TestExtractor_fetch(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "Non-http scheme javascript",
+			fields:  fields{e.cfg},
+			url:     "javascript:alert(1)",
+			wantErr: true,
+		},
+		{
+			name:    "Non-http scheme file",
+			fields:  fields{e.cfg},
+			url:     "file:///etc/passwd",
+			wantErr: true,
+		},
+		{
 			name:    "404 HTTP response",
 			fields:  fields{e.cfg},
 			url:     fmt.Sprintf("%s/404", server.URL),
@@ -2466,9 +2478,9 @@ func TestExtractor_fetch(t *testing.T) {
 func TestExtractor_fetch_NewRequestError(t *testing.T) {
 	e := New()
 
-	_, err := e.fetch(context.Background(), "://invalid-url")
+	_, err := e.fetch(context.Background(), "https://invalid host")
 	if err == nil {
-		t.Error("expected error for invalid URL but got none")
+		t.Error("expected error for malformed URL but got none")
 	}
 }
 
