@@ -496,7 +496,7 @@ func TestResolveXCardsURLs(t *testing.T) {
 			{URL: "/xvid.mp4", SecureURL: "/sxvid.mp4"},
 		},
 		XCardsAudio: []XCardsAudio{
-			{URL: "/xaudio.mp3"},
+			{URL: "/xaudio.mp3", SecureURL: "/sxaudio.mp3"},
 		},
 	}
 	resolveXCardsURLs(xc, "http://example.com")
@@ -536,6 +536,9 @@ func TestResolveXCardsURLs(t *testing.T) {
 	}
 	if xc.XCardsAudio[0].URL != "http://example.com/xaudio.mp3" {
 		t.Errorf("XCardsAudio URL: %q", xc.XCardsAudio[0].URL)
+	}
+	if xc.XCardsAudio[0].SecureURL != "http://example.com/sxaudio.mp3" {
+		t.Errorf("XCardsAudio SecureURL: %q", xc.XCardsAudio[0].SecureURL)
 	}
 }
 

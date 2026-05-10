@@ -124,6 +124,7 @@ func resolveXCardsURLs(xc *XCards, base string) {
 	}
 	for i := range xc.XCardsAudio {
 		xc.XCardsAudio[i].URL = resolveURL(base, xc.XCardsAudio[i].URL)
+		xc.XCardsAudio[i].SecureURL = resolveURL(base, xc.XCardsAudio[i].SecureURL)
 	}
 }
 
