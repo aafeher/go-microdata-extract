@@ -8,6 +8,7 @@ import (
 	extractor "github.com/aafeher/go-microdata-extract/extractors"
 	"io"
 	"net/http"
+	"slices"
 	"sync"
 	"time"
 )
@@ -119,7 +120,7 @@ func (e *Extractor) SetSyntaxes(syntaxes []Syntax) *Extractor {
 
 	syntaxesToSet := make([]Syntax, 0)
 	for _, syntax := range syntaxes {
-		if contains(defaultSyntaxes, syntax) {
+		if slices.Contains(defaultSyntaxes, syntax) {
 			syntaxesToSet = append(syntaxesToSet, syntax)
 		}
 	}
@@ -177,7 +178,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 
 	var processors []processor
 
-	if contains(e.cfg.syntaxes, SyntaxOpenGraph) {
+	if slices.Contains(e.cfg.syntaxes, SyntaxOpenGraph) {
 		processors = append(processors, processor{
 			Name: SyntaxOpenGraph,
 			Func: func() (any, []error) {
@@ -189,7 +190,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 			},
 		})
 	}
-	if contains(e.cfg.syntaxes, SyntaxXCards) {
+	if slices.Contains(e.cfg.syntaxes, SyntaxXCards) {
 		processors = append(processors, processor{
 			Name: SyntaxXCards,
 			Func: func() (any, []error) {
@@ -201,7 +202,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 			},
 		})
 	}
-	if contains(e.cfg.syntaxes, SyntaxJSONLD) {
+	if slices.Contains(e.cfg.syntaxes, SyntaxJSONLD) {
 		processors = append(processors, processor{
 			Name: SyntaxJSONLD,
 			Func: func() (any, []error) {
@@ -209,7 +210,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 			},
 		})
 	}
-	if contains(e.cfg.syntaxes, SyntaxMicrodata) {
+	if slices.Contains(e.cfg.syntaxes, SyntaxMicrodata) {
 		processors = append(processors, processor{
 			Name: SyntaxMicrodata,
 			Func: func() (any, []error) {
@@ -217,7 +218,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 			},
 		})
 	}
-	if contains(e.cfg.syntaxes, SyntaxRDFa) {
+	if slices.Contains(e.cfg.syntaxes, SyntaxRDFa) {
 		processors = append(processors, processor{
 			Name: SyntaxRDFa,
 			Func: func() (any, []error) {
@@ -225,7 +226,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 			},
 		})
 	}
-	if contains(e.cfg.syntaxes, SyntaxDublinCore) {
+	if slices.Contains(e.cfg.syntaxes, SyntaxDublinCore) {
 		processors = append(processors, processor{
 			Name: SyntaxDublinCore,
 			Func: func() (any, []error) {
@@ -237,7 +238,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 			},
 		})
 	}
-	if contains(e.cfg.syntaxes, SyntaxMicroformats) {
+	if slices.Contains(e.cfg.syntaxes, SyntaxMicroformats) {
 		processors = append(processors, processor{
 			Name: SyntaxMicroformats,
 			Func: func() (any, []error) {
@@ -346,20 +347,4 @@ func (e *Extractor) GetExtractedJSON() json.RawMessage {
 	}
 
 	return extractedJSON
-}
-
-// index returns the index of the first occurrence of v in s,
-// or -1 if not present.
-func index[S ~[]E, E comparable](s S, v E) int {
-	for i := range s {
-		if v == s[i] {
-			return i
-		}
-	}
-	return -1
-}
-
-// contains reports whether v is present in s.
-func contains[S ~[]E, E comparable](s S, v E) bool {
-	return index(s, v) >= 0
 }
