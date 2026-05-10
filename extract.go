@@ -36,6 +36,15 @@ type ParseError struct {
 func (e *ParseError) Error() string { return fmt.Sprintf("parse %q: %s", e.Syntax, e.Err) }
 func (e *ParseError) Unwrap() error { return e.Err }
 
+// ConfigError is returned by Extract when the Extractor is misconfigured.
+type ConfigError struct {
+	Field string
+	Err   error
+}
+
+func (e *ConfigError) Error() string { return fmt.Sprintf("config %q: %s", e.Field, e.Err) }
+func (e *ConfigError) Unwrap() error { return e.Err }
+
 type (
 	// Extractor is a struct used for extracting metadata from web content or a provided URL. It utilizes various processors.
 	Extractor struct {
@@ -210,6 +219,17 @@ func (e *Extractor) GetMaxBodySize() int64 {
 // url: The URL to extract metadata from.
 // urlContent: Optional pointer to a string containing HTML content. If nil, the content at the URL will be fetched.
 func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string) (*Extractor, error) {
+	if e.cfg.httpClient == nil && e.cfg.fetchTimeout == 0 {
+		err := &ConfigError{Field: "fetchTimeout", Err: fmt.Errorf("must be greater than 0")}
+		e.errs = append(e.errs, err)
+		return e, err
+	}
+	if e.cfg.maxBodySize <= 0 {
+		err := &ConfigError{Field: "maxBodySize", Err: fmt.Errorf("must be greater than 0")}
+		e.errs = append(e.errs, err)
+		return e, err
+	}
+
 	var err error
 	var mu sync.Mutex
 	var wg sync.WaitGroup

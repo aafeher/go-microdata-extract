@@ -2695,6 +2695,69 @@ func areSyntaxSlicesEqual(slice1, slice2 []Syntax) bool {
 	return true
 }
 
+func TestConfigError_Error(t *testing.T) {
+	ce := &ConfigError{Field: "fetchTimeout", Err: fmt.Errorf("must be greater than 0")}
+	want := `config "fetchTimeout": must be greater than 0`
+	if ce.Error() != want {
+		t.Errorf("ConfigError.Error() = %q; want %q", ce.Error(), want)
+	}
+}
+
+func TestConfigError_Unwrap(t *testing.T) {
+	inner := fmt.Errorf("inner")
+	ce := &ConfigError{Field: "maxBodySize", Err: inner}
+	if ce.Unwrap() != inner {
+		t.Errorf("ConfigError.Unwrap() = %v; want %v", ce.Unwrap(), inner)
+	}
+}
+
+func TestExtractor_Extract_ConfigError_ZeroFetchTimeout(t *testing.T) {
+	e := New()
+	e.SetFetchTimeout(0)
+	_, err := e.Extract(context.Background(), "http://example.com", nil)
+	if err == nil {
+		t.Fatal("expected ConfigError, got nil")
+	}
+	var ce *ConfigError
+	if !errors.As(err, &ce) {
+		t.Fatalf("expected *ConfigError, got %T: %v", err, err)
+	}
+	if ce.Field != "fetchTimeout" {
+		t.Errorf("Field = %q; want fetchTimeout", ce.Field)
+	}
+}
+
+func TestExtractor_Extract_ConfigError_ZeroFetchTimeout_WithHTTPClient(t *testing.T) {
+	server := testServer()
+	defer server.Close()
+
+	// fetchTimeout == 0 is allowed when a custom HTTP client is provided.
+	e := New()
+	e.SetFetchTimeout(0).SetHTTPClient(&http.Client{Timeout: 5 * time.Second})
+	_, err := e.Extract(context.Background(), fmt.Sprintf("%s/test-01-opengraph-minimal.html", server.URL), nil)
+	if err != nil {
+		t.Fatalf("unexpected error with custom client and zero fetchTimeout: %v", err)
+	}
+}
+
+func TestExtractor_Extract_ConfigError_NonPositiveMaxBodySize(t *testing.T) {
+	for _, size := range []int64{0, -1, -1024} {
+		e := New()
+		e.SetMaxBodySize(size)
+		_, err := e.Extract(context.Background(), "http://example.com", nil)
+		if err == nil {
+			t.Fatalf("size=%d: expected ConfigError, got nil", size)
+		}
+		var ce *ConfigError
+		if !errors.As(err, &ce) {
+			t.Fatalf("size=%d: expected *ConfigError, got %T: %v", size, err, err)
+		}
+		if ce.Field != "maxBodySize" {
+			t.Errorf("size=%d: Field = %q; want maxBodySize", size, ce.Field)
+		}
+	}
+}
+
 func TestFetchError_Error(t *testing.T) {
 	fe := &FetchError{URL: "http://example.com", Err: fmt.Errorf("timeout")}
 	want := `fetch "http://example.com": timeout`

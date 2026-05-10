@@ -176,6 +176,18 @@ In this example, structured data is extracted from `"https://github.com/aafeher/
 
 ### Error handling
 
+`Extract()` returns a `*ConfigError` when the Extractor is misconfigured (e.g. `fetchTimeout` is 0 without a custom HTTP client, or `maxBodySize` is ≤ 0). This check happens before any network call:
+
+```go
+_, err := extract.New().SetFetchTimeout(0).Extract(ctx, "https://example.com", nil)
+if err != nil {
+    var ce *extract.ConfigError
+    if errors.As(err, &ce) {
+        fmt.Printf("config error — field %q: %v\n", ce.Field, ce.Err)
+    }
+}
+```
+
 `Extract()` returns a `*FetchError` when the HTTP fetch step fails (network error or non-200 status). Use `errors.As` to distinguish fetch failures from parse failures:
 
 ```go
