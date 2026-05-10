@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-05-10
+
+### Added
+- `ConfigError` structured error type (`Field string`, `Err error`) — returned by `Extract()` before any network call when the Extractor is misconfigured (e.g. `fetchTimeout` is 0 without a custom HTTP client, or `maxBodySize` ≤ 0); supports `errors.As` and `errors.Unwrap`
+- Configuration getter methods: `GetUserAgent() string`, `GetFetchTimeout() uint8`, `GetHTTPClient() *http.Client`, `GetMaxBodySize() int64`, `GetSyntaxes() []Syntax` — allow callers to inspect the active configuration; `GetSyntaxes()` returns a copy to prevent external mutation
+- `SetMaxBodySize(size int64) *Extractor` — caps the number of bytes read from an HTTP response body via `io.LimitReader`; responses exceeding the limit are rejected with a `FetchError`; default is 10 MB
+- URL scheme validation at the start of `Extract()` — non-`http`/`https` schemes (e.g. `javascript:`, `file:`, `data:`) are rejected immediately with a `FetchError` before any HTTP client call
+- Relative URL resolution in `ParseRDFa` — `href`, `src`, and `resource` attribute values are now resolved against the page base URL (the `URL` parameter was previously discarded)
+- Relative URL resolution in `ParseMicroformats` — `u-*` property values (`href`, `src`, `data`, `action`) are now resolved against the page base URL (the `URL` parameter was previously discarded)
+- Relative URL resolution in `ParseJSONLD` — `@id` and `url` field values are now resolved against the page base URL (the `URL` parameter was previously discarded); resolution is applied recursively to nested objects and arrays
+- Package-level godoc: `// Package extract …` in `extract.go` and `// Package extractor …` in `extractors/doc.go`
+- Godoc comments added to previously undocumented public functions: `ParseJSONLD`, `ParseW3CMicrodata`, `ParseMicroformats`
+- New examples: `getconfiguration`, `getxcards`, `sethttpclient`, `setmaxbodysize`, `getextractedjson`
+- `errorhandling` example extended with a `ConfigError` scenario
+
+### Changed
+- **API: extractor public functions renamed to consistent `Parse*` prefix** — `JSONLD` → `ParseJSONLD`, `W3CMicrodata` → `ParseW3CMicrodata`, `RDFa` → `ParseRDFa`, `DublinCore` → `ParseDublinCore`, `Microformats` → `ParseMicroformats`; `ParseOpenGraph` and `ParseXCards` were already using this prefix
+- `XCardsAudio.SecureURL` is now resolved against the base URL in `resolveXCardsURLs()` — previously only `URL` was resolved; all other media types (XCardsImage, XCardsVideo, OpenGraphImage, OpenGraphVideo, OpenGraphAudio) already resolved both fields
+- Custom generic helpers `contains[]`/`index[]` replaced with stdlib `slices.Contains`/`slices.Index` (available since Go 1.21)
+- `golang.org/x/net` bumped to v0.54.0
+
+### Fixed
+- `XCardsAudio.SecureURL` was silently left unresolved — the only `SecureURL` field across all media types not passed through `resolveURL`
+
 ## [0.11.0] - 2026-05-08
 
 ### Added
@@ -195,7 +219,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for providing raw HTML content directly (bypassing HTTP fetch)
 - Examples: simple extraction, OpenGraph-only, configuring specific syntaxes
 
-[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/aafeher/go-microdata-extract/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/aafeher/go-microdata-extract/compare/v0.8.0...v0.9.0
