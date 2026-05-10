@@ -14,7 +14,7 @@ func TestRDFa_Basic(t *testing.T) {
 			<span property="name">Alice</span>
 		</div>
 	</body></html>`
-	items, errs := RDFa("", htmlStr)
+	items, errs := ParseRDFa("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -35,7 +35,7 @@ func TestRDFa_WithVocab(t *testing.T) {
 			<span property="name">My Article</span>
 		</div>
 	</body></html>`
-	items, errs := RDFa("", htmlStr)
+	items, errs := ParseRDFa("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -56,7 +56,7 @@ func TestRDFa_WithPrefixAttribute(t *testing.T) {
 			<span property="schema:name">A Book</span>
 		</div>
 	</body></html>`
-	items, errs := RDFa("", htmlStr)
+	items, errs := ParseRDFa("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -77,7 +77,7 @@ func TestRDFa_WithResourceAndAbout(t *testing.T) {
 			<span property="name">Alice</span>
 		</div>
 	</body></html>`
-	items, errs := RDFa("", htmlStr)
+	items, errs := ParseRDFa("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -101,7 +101,7 @@ func TestRDFa_NestedItemsWithPropAndTypeof(t *testing.T) {
 			</div>
 		</div>
 	</body></html>`
-	items, errs := RDFa("", htmlStr)
+	items, errs := ParseRDFa("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -124,7 +124,7 @@ func TestRDFa_NestedTypeofWithoutProp(t *testing.T) {
 			</div>
 		</div>
 	</body></html>`
-	items, errs := RDFa("", htmlStr)
+	items, errs := ParseRDFa("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -143,7 +143,7 @@ func TestRDFa_DefaultBranchContinuesWalking(t *testing.T) {
 			</div>
 		</div>
 	</body></html>`
-	items, errs := RDFa("", htmlStr)
+	items, errs := ParseRDFa("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -321,7 +321,7 @@ func TestRDFa_VocabChangesInsideItem(t *testing.T) {
 			</div>
 		</div>
 	</body></html>`
-	items, errs := RDFa("", htmlStr)
+	items, errs := ParseRDFa("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -340,7 +340,7 @@ func TestRDFa_RelativeURLResolution(t *testing.T) {
 		</div>
 	</body></html>`
 
-	items, errs := RDFa(base, htmlStr)
+	items, errs := ParseRDFa(base, htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}

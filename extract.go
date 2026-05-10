@@ -220,7 +220,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		processors = append(processors, processor{
 			Name: SyntaxJSONLD,
 			Func: func() (any, []error) {
-				return extractor.JSONLD(e.url, e.content)
+				return extractor.ParseJSONLD(e.url, e.content)
 			},
 		})
 	}
@@ -228,7 +228,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		processors = append(processors, processor{
 			Name: SyntaxMicrodata,
 			Func: func() (any, []error) {
-				return extractor.W3CMicrodata(e.url, e.content)
+				return extractor.ParseW3CMicrodata(e.url, e.content)
 			},
 		})
 	}
@@ -236,7 +236,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		processors = append(processors, processor{
 			Name: SyntaxRDFa,
 			Func: func() (any, []error) {
-				return extractor.RDFa(e.url, e.content)
+				return extractor.ParseRDFa(e.url, e.content)
 			},
 		})
 	}
@@ -244,7 +244,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		processors = append(processors, processor{
 			Name: SyntaxDublinCore,
 			Func: func() (any, []error) {
-				result, errs := extractor.DublinCore(e.url, e.content)
+				result, errs := extractor.ParseDublinCore(e.url, e.content)
 				if result == nil {
 					return nil, errs
 				}
@@ -256,7 +256,7 @@ func (e *Extractor) Extract(ctx context.Context, url string, urlContent *string)
 		processors = append(processors, processor{
 			Name: SyntaxMicroformats,
 			Func: func() (any, []error) {
-				return extractor.Microformats(e.url, e.content)
+				return extractor.ParseMicroformats(e.url, e.content)
 			},
 		})
 	}

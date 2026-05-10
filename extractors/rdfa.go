@@ -15,8 +15,8 @@ type RDFaItem struct {
 	Properties map[string]any `json:"properties,omitempty"`
 }
 
-// RDFa extracts RDFa structured data from HTML content.
-func RDFa(URL string, htmlContent string) ([]RDFaItem, []error) {
+// ParseRDFa extracts RDFa structured data from HTML content.
+func ParseRDFa(URL string, htmlContent string) ([]RDFaItem, []error) {
 	return parseRDFa(URL, htmlContent)
 }
 

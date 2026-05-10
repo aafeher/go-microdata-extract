@@ -12,7 +12,7 @@ type MicrodataItem struct {
 	Properties map[string]any `json:"properties,omitempty"`
 }
 
-func W3CMicrodata(URL string, htmlContent string) ([]MicrodataItem, []error) {
+func ParseW3CMicrodata(URL string, htmlContent string) ([]MicrodataItem, []error) {
 	items, errors := parseW3CMicrodata(URL, htmlContent)
 
 	var results []MicrodataItem

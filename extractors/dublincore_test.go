@@ -5,7 +5,7 @@ import (
 )
 
 func TestDublinCore_EmptyHTML(t *testing.T) {
-	item, errs := DublinCore("", `<html><head></head></html>`)
+	item, errs := ParseDublinCore("", `<html><head></head></html>`)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -20,7 +20,7 @@ func TestDublinCore_WithMetaTags(t *testing.T) {
 		<meta name="DC.creator" content="Alice">
 		<meta name="DCterms.subject" content="Science">
 	</head></html>`
-	item, errs := DublinCore("", html)
+	item, errs := ParseDublinCore("", html)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -42,7 +42,7 @@ func TestDublinCore_WithLinkTags(t *testing.T) {
 	html := `<html><head>
 		<link rel="DC.identifier" href="/resource/123">
 	</head></html>`
-	item, errs := DublinCore("http://example.com", html)
+	item, errs := ParseDublinCore("http://example.com", html)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -63,7 +63,7 @@ func TestDublinCore_MultipleValuesForSameProp(t *testing.T) {
 		<meta name="DC.subject" content="Topic A">
 		<meta name="DC.subject" content="Topic B">
 	</head></html>`
-	item, errs := DublinCore("", html)
+	item, errs := ParseDublinCore("", html)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -86,7 +86,7 @@ func TestDublinCore_MetaWithNoContent(t *testing.T) {
 	html := `<html><head>
 		<meta name="DC.title">
 	</head></html>`
-	item, errs := DublinCore("", html)
+	item, errs := ParseDublinCore("", html)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -100,7 +100,7 @@ func TestDublinCore_LinkWithNoHref(t *testing.T) {
 	html := `<html><head>
 		<link rel="DC.identifier">
 	</head></html>`
-	item, errs := DublinCore("", html)
+	item, errs := ParseDublinCore("", html)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}

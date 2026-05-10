@@ -14,7 +14,7 @@ type MicroformatItem struct {
 }
 
 // Microformats extracts Microformats2 structured data from HTML content.
-func Microformats(URL string, htmlContent string) ([]MicroformatItem, []error) {
+func ParseMicroformats(URL string, htmlContent string) ([]MicroformatItem, []error) {
 	return parseMicroformats(URL, htmlContent)
 }
 

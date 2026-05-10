@@ -14,7 +14,7 @@ func TestMicroformats_Basic_HCard(t *testing.T) {
 			<a class="u-url" href="http://example.com/alice">Profile</a>
 		</div>
 	</body></html>`
-	items, errs := Microformats("", htmlStr)
+	items, errs := ParseMicroformats("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -42,7 +42,7 @@ func TestMicroformats_HEntry_AllPropertyTypes(t *testing.T) {
 			<div class="e-content"><p>Hello world</p></div>
 		</article>
 	</body></html>`
-	items, errs := Microformats("", htmlStr)
+	items, errs := ParseMicroformats("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -73,7 +73,7 @@ func TestMicroformats_NestedRootAsPropValue(t *testing.T) {
 			</div>
 		</div>
 	</body></html>`
-	items, errs := Microformats("", htmlStr)
+	items, errs := ParseMicroformats("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -96,7 +96,7 @@ func TestMicroformats_NestedRootAsChild(t *testing.T) {
 			</div>
 		</div>
 	</body></html>`
-	items, errs := Microformats("", htmlStr)
+	items, errs := ParseMicroformats("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -121,7 +121,7 @@ func TestMicroformats_NestedRootAsPropWithMultiplePropTypes(t *testing.T) {
 			</div>
 		</div>
 	</body></html>`
-	items, errs := Microformats("", htmlStr)
+	items, errs := ParseMicroformats("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -148,7 +148,7 @@ func TestMicroformats_MultipleValues(t *testing.T) {
 			<a class="u-url" href="/2">Link 2</a>
 		</div>
 	</body></html>`
-	items, errs := Microformats("", htmlStr)
+	items, errs := ParseMicroformats("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -448,7 +448,7 @@ func TestParseMicroformatsFrom_ErrReader(t *testing.T) {
 func TestMicroformats_NoMfClasses(t *testing.T) {
 	// No h-* classes → empty
 	htmlStr := `<html><body><div class="not-mf"><span>text</span></div></body></html>`
-	items, errs := Microformats("", htmlStr)
+	items, errs := ParseMicroformats("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -495,7 +495,7 @@ func TestMicroformats_RelativeURLResolution(t *testing.T) {
 		</div>
 	</body></html>`
 
-	items, errs := Microformats(base, htmlStr)
+	items, errs := ParseMicroformats(base, htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}

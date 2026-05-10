@@ -11,9 +11,9 @@ type DublinCoreItem struct {
 	Properties map[string]any `json:"properties,omitempty"`
 }
 
-// DublinCore extracts Dublin Core metadata from HTML content.
+// ParseDublinCore extracts Dublin Core metadata from HTML content.
 // It supports DC.* and DCTERMS.* prefixes in <meta name> and <link rel> attributes.
-func DublinCore(URL string, htmlContent string) (*DublinCoreItem, []error) {
+func ParseDublinCore(URL string, htmlContent string) (*DublinCoreItem, []error) {
 	return parseDublinCore(URL, htmlContent)
 }
 

@@ -14,7 +14,7 @@ func TestW3CMicrodata_Basic(t *testing.T) {
 			<span itemprop="age">30</span>
 		</div>
 	</body></html>`
-	items, errs := W3CMicrodata("", htmlStr)
+	items, errs := ParseW3CMicrodata("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -39,7 +39,7 @@ func TestW3CMicrodata_WithItemID(t *testing.T) {
 			<span itemprop="name">Alice</span>
 		</div>
 	</body></html>`
-	items, errs := W3CMicrodata("", htmlStr)
+	items, errs := ParseW3CMicrodata("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -63,7 +63,7 @@ func TestW3CMicrodata_NestedItems(t *testing.T) {
 			</div>
 		</div>
 	</body></html>`
-	items, errs := W3CMicrodata("", htmlStr)
+	items, errs := ParseW3CMicrodata("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -96,7 +96,7 @@ func TestW3CMicrodata_NestedItems(t *testing.T) {
 
 func TestW3CMicrodata_NoItemscope(t *testing.T) {
 	htmlStr := `<html><body><div><span>plain text</span></div></body></html>`
-	items, errs := W3CMicrodata("", htmlStr)
+	items, errs := ParseW3CMicrodata("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -111,7 +111,7 @@ func TestParseProperties_MetaWithContent(t *testing.T) {
 			<meta itemprop="description" content="Meta content">
 		</div>
 	</body></html>`
-	items, errs := W3CMicrodata("", htmlStr)
+	items, errs := ParseW3CMicrodata("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -129,7 +129,7 @@ func TestParseProperties_Datetime(t *testing.T) {
 			<time itemprop="published" datetime="2023-01-15">January 15</time>
 		</div>
 	</body></html>`
-	items, errs := W3CMicrodata("", htmlStr)
+	items, errs := ParseW3CMicrodata("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -148,7 +148,7 @@ func TestParseProperties_URLProp(t *testing.T) {
 			<a itemprop="url" href="/page">Link</a>
 		</div>
 	</body></html>`
-	items, errs := W3CMicrodata("http://example.com", htmlStr)
+	items, errs := ParseW3CMicrodata("http://example.com", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -167,7 +167,7 @@ func TestParseProperties_SuffixUrlProp(t *testing.T) {
 			<a itemprop="imageUrl" href="/img.jpg">Image</a>
 		</div>
 	</body></html>`
-	items, errs := W3CMicrodata("http://example.com", htmlStr)
+	items, errs := ParseW3CMicrodata("http://example.com", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -188,7 +188,7 @@ func TestParseProperties_NonItempropChild(t *testing.T) {
 			</div>
 		</div>
 	</body></html>`
-	items, errs := W3CMicrodata("", htmlStr)
+	items, errs := ParseW3CMicrodata("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
@@ -333,7 +333,7 @@ func TestW3CMicrodata_MultiplePropsForSamePropName(t *testing.T) {
 			<span itemprop="tag">programming</span>
 		</div>
 	</body></html>`
-	items, errs := W3CMicrodata("", htmlStr)
+	items, errs := ParseW3CMicrodata("", htmlStr)
 	if len(errs) != 0 {
 		t.Fatalf("unexpected errors: %v", errs)
 	}
