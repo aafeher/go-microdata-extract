@@ -12,6 +12,8 @@ var urlFields = map[string]bool{
 	"url": true,
 }
 
+// ParseJSONLD extracts JSON-LD structured data from <script type="application/ld+json"> blocks in htmlContent,
+// resolving relative @id and url field values against URL.
 func ParseJSONLD(URL string, htmlContent string) ([]map[string]any, []error) {
 	items, errs := extractJSONLD(htmlContent)
 	if URL != "" {

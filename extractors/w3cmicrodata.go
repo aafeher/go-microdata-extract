@@ -12,6 +12,7 @@ type MicrodataItem struct {
 	Properties map[string]any `json:"properties,omitempty"`
 }
 
+// ParseW3CMicrodata extracts W3C Microdata items from htmlContent, resolving relative URLs against URL.
 func ParseW3CMicrodata(URL string, htmlContent string) ([]MicrodataItem, []error) {
 	items, errors := parseW3CMicrodata(URL, htmlContent)
 

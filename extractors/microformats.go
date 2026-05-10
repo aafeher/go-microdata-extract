@@ -13,7 +13,7 @@ type MicroformatItem struct {
 	Children   []*MicroformatItem `json:"children,omitempty"`
 }
 
-// Microformats extracts Microformats2 structured data from HTML content.
+// ParseMicroformats extracts Microformats2 items from htmlContent, resolving relative u-* URL values against URL.
 func ParseMicroformats(URL string, htmlContent string) ([]MicroformatItem, []error) {
 	return parseMicroformats(URL, htmlContent)
 }
