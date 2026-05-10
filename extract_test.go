@@ -2832,6 +2832,64 @@ func TestExtractor_fetch_BodySizeLimitExceeded(t *testing.T) {
 	}
 }
 
+func TestExtractor_GetSyntaxes(t *testing.T) {
+	e := New()
+	got := e.GetSyntaxes()
+	if len(got) != len(defaultSyntaxes) {
+		t.Fatalf("expected %d syntaxes, got %d", len(defaultSyntaxes), len(got))
+	}
+	// mutation of returned slice must not affect internal state
+	got[0] = "tampered"
+	if e.cfg.syntaxes[0] == "tampered" {
+		t.Error("GetSyntaxes returned internal slice reference instead of a copy")
+	}
+}
+
+func TestExtractor_GetUserAgent(t *testing.T) {
+	e := New()
+	if e.GetUserAgent() != e.cfg.userAgent {
+		t.Errorf("expected %q, got %q", e.cfg.userAgent, e.GetUserAgent())
+	}
+	e.SetUserAgent("custom-agent")
+	if e.GetUserAgent() != "custom-agent" {
+		t.Errorf("expected custom-agent, got %q", e.GetUserAgent())
+	}
+}
+
+func TestExtractor_GetFetchTimeout(t *testing.T) {
+	e := New()
+	if e.GetFetchTimeout() != e.cfg.fetchTimeout {
+		t.Errorf("expected %d, got %d", e.cfg.fetchTimeout, e.GetFetchTimeout())
+	}
+	e.SetFetchTimeout(10)
+	if e.GetFetchTimeout() != 10 {
+		t.Errorf("expected 10, got %d", e.GetFetchTimeout())
+	}
+}
+
+func TestExtractor_GetHTTPClient(t *testing.T) {
+	e := New()
+	if e.GetHTTPClient() != nil {
+		t.Fatal("expected nil by default")
+	}
+	client := &http.Client{Timeout: 5 * time.Second}
+	e.SetHTTPClient(client)
+	if e.GetHTTPClient() != client {
+		t.Error("expected the custom client back")
+	}
+}
+
+func TestExtractor_GetMaxBodySize(t *testing.T) {
+	e := New()
+	if e.GetMaxBodySize() != defaultMaxBodySize {
+		t.Errorf("expected default %d, got %d", defaultMaxBodySize, e.GetMaxBodySize())
+	}
+	e.SetMaxBodySize(512)
+	if e.GetMaxBodySize() != 512 {
+		t.Errorf("expected 512, got %d", e.GetMaxBodySize())
+	}
+}
+
 func TestExtractor_fetch_BodySizeLimitNotExceeded(t *testing.T) {
 	const limit int64 = 100
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

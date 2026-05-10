@@ -130,6 +130,20 @@ e = e.SetMaxBodySize(5 * 1024 * 1024) // 5 MB
 e := extract.New().SetMaxBodySize(5 * 1024 * 1024)
 ```
 
+#### Reading configuration
+
+Use the corresponding `Get*()` methods to inspect the active configuration:
+
+```go
+e := extract.New().SetUserAgent("MyBot").SetFetchTimeout(10)
+
+fmt.Println(e.GetUserAgent())    // "MyBot"
+fmt.Println(e.GetFetchTimeout()) // 10
+fmt.Println(e.GetMaxBodySize())  // 10485760 (default 10 MB)
+fmt.Println(e.GetSyntaxes())     // [opengraph xcards json-ld microdata rdfa dublincore microformats]
+fmt.Println(e.GetHTTPClient())   // <nil>
+```
+
 #### Chaining methods
 
 In both cases, the functions return a pointer to the main object of the package, allowing you to chain these setting methods in a fluent interface style:

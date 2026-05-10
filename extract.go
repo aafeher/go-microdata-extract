@@ -178,6 +178,33 @@ func (e *Extractor) SetMaxBodySize(size int64) *Extractor {
 	return e
 }
 
+// GetSyntaxes returns a copy of the currently configured syntax list.
+func (e *Extractor) GetSyntaxes() []Syntax {
+	cp := make([]Syntax, len(e.cfg.syntaxes))
+	copy(cp, e.cfg.syntaxes)
+	return cp
+}
+
+// GetUserAgent returns the User-Agent string used for HTTP requests.
+func (e *Extractor) GetUserAgent() string {
+	return e.cfg.userAgent
+}
+
+// GetFetchTimeout returns the HTTP fetch timeout in seconds.
+func (e *Extractor) GetFetchTimeout() uint8 {
+	return e.cfg.fetchTimeout
+}
+
+// GetHTTPClient returns the custom HTTP client, or nil if none was set.
+func (e *Extractor) GetHTTPClient() *http.Client {
+	return e.cfg.httpClient
+}
+
+// GetMaxBodySize returns the maximum response body size in bytes.
+func (e *Extractor) GetMaxBodySize() int64 {
+	return e.cfg.maxBodySize
+}
+
 // Extract retrieves metadata from the specified URL or provided content and processes it using various parsers.
 // ctx: A context for cancellation and timeout control of the HTTP fetch.
 // url: The URL to extract metadata from.
