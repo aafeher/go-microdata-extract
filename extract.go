@@ -1,3 +1,7 @@
+// Package extract provides an HTML structured-metadata extractor that supports
+// OpenGraph, X Cards, JSON-LD, W3C Microdata, RDFa, Dublin Core, and Microformats2.
+// Call New() to create an Extractor, configure it with the Set* methods, then call
+// Extract() to fetch or parse HTML and retrieve the results via Get* methods.
 package extract
 
 import (
