@@ -16,15 +16,15 @@ type RDFaItem struct {
 }
 
 // RDFa extracts RDFa structured data from HTML content.
-func RDFa(_ string, htmlContent string) ([]RDFaItem, []error) {
-	return parseRDFa(htmlContent)
+func RDFa(URL string, htmlContent string) ([]RDFaItem, []error) {
+	return parseRDFa(URL, htmlContent)
 }
 
-func parseRDFa(htmlContent string) ([]RDFaItem, []error) {
-	return parseRDFaFrom(strings.NewReader(htmlContent))
+func parseRDFa(baseURL, htmlContent string) ([]RDFaItem, []error) {
+	return parseRDFaFrom(baseURL, strings.NewReader(htmlContent))
 }
 
-func parseRDFaFrom(r io.Reader) ([]RDFaItem, []error) {
+func parseRDFaFrom(baseURL string, r io.Reader) ([]RDFaItem, []error) {
 	doc, err := html.Parse(r)
 	if err != nil {
 		return nil, []error{err}
@@ -32,11 +32,11 @@ func parseRDFaFrom(r io.Reader) ([]RDFaItem, []error) {
 	prefixes := collectRDFaPrefixes(doc)
 
 	var items []RDFaItem
-	walkRDFa(doc, "", prefixes, &items)
+	walkRDFa(doc, "", prefixes, baseURL, &items)
 	return items, nil
 }
 
-func walkRDFa(n *html.Node, vocab string, prefixes map[string]string, items *[]RDFaItem) {
+func walkRDFa(n *html.Node, vocab string, prefixes map[string]string, baseURL string, items *[]RDFaItem) {
 	if n.Type == html.ElementNode {
 		if v := getAttrVal(n, "vocab"); v != "" {
 			vocab = v
@@ -45,18 +45,18 @@ func walkRDFa(n *html.Node, vocab string, prefixes map[string]string, items *[]R
 		prop := getAttrVal(n, "property")
 		if typeof != "" && prop == "" {
 			var extraItems []RDFaItem
-			item := buildRDFaItem(n, typeof, vocab, prefixes, &extraItems)
+			item := buildRDFaItem(n, typeof, vocab, prefixes, baseURL, &extraItems)
 			*items = append(*items, item)
 			*items = append(*items, extraItems...)
 			return
 		}
 	}
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		walkRDFa(c, vocab, prefixes, items)
+		walkRDFa(c, vocab, prefixes, baseURL, items)
 	}
 }
 
-func buildRDFaItem(n *html.Node, typeof, vocab string, prefixes map[string]string, extraItems *[]RDFaItem) RDFaItem {
+func buildRDFaItem(n *html.Node, typeof, vocab string, prefixes map[string]string, baseURL string, extraItems *[]RDFaItem) RDFaItem {
 	item := RDFaItem{
 		Properties: make(map[string]any),
 	}
@@ -65,16 +65,18 @@ func buildRDFaItem(n *html.Node, typeof, vocab string, prefixes map[string]strin
 	}
 	item.Type = resolveRDFaTerm(typeof, vocab, prefixes)
 	if resource := getAttrVal(n, "resource"); resource != "" {
-		item.Resource = &resource
+		resolved := resolveURL(baseURL, resource)
+		item.Resource = &resolved
 	}
 	if about := getAttrVal(n, "about"); about != "" {
-		item.About = &about
+		resolved := resolveURL(baseURL, about)
+		item.About = &resolved
 	}
-	collectRDFaProperties(n, &item, vocab, prefixes, extraItems)
+	collectRDFaProperties(n, &item, vocab, prefixes, baseURL, extraItems)
 	return item
 }
 
-func collectRDFaProperties(n *html.Node, item *RDFaItem, vocab string, prefixes map[string]string, extraItems *[]RDFaItem) {
+func collectRDFaProperties(n *html.Node, item *RDFaItem, vocab string, prefixes map[string]string, baseURL string, extraItems *[]RDFaItem) {
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		if c.Type != html.ElementNode {
 			continue
@@ -86,24 +88,24 @@ func collectRDFaProperties(n *html.Node, item *RDFaItem, vocab string, prefixes 
 		typeof := getAttrVal(c, "typeof")
 		switch {
 		case prop != "" && typeof != "":
-			subItem := buildRDFaItem(c, typeof, vocab, prefixes, extraItems)
+			subItem := buildRDFaItem(c, typeof, vocab, prefixes, baseURL, extraItems)
 			propKey := resolveRDFaTerm(prop, vocab, prefixes)
 			item.Properties[propKey] = appendValue(item.Properties[propKey], &subItem)
 		case prop != "":
 			propKey := resolveRDFaTerm(prop, vocab, prefixes)
-			val := getRDFaPropertyValue(c)
+			val := getRDFaPropertyValue(c, baseURL)
 			item.Properties[propKey] = appendValue(item.Properties[propKey], val)
-			collectRDFaProperties(c, item, vocab, prefixes, extraItems)
+			collectRDFaProperties(c, item, vocab, prefixes, baseURL, extraItems)
 		case typeof != "":
-			sibling := buildRDFaItem(c, typeof, vocab, prefixes, extraItems)
+			sibling := buildRDFaItem(c, typeof, vocab, prefixes, baseURL, extraItems)
 			*extraItems = append(*extraItems, sibling)
 		default:
-			collectRDFaProperties(c, item, vocab, prefixes, extraItems)
+			collectRDFaProperties(c, item, vocab, prefixes, baseURL, extraItems)
 		}
 	}
 }
 
-func getRDFaPropertyValue(n *html.Node) string {
+func getRDFaPropertyValue(n *html.Node, baseURL string) string {
 	if content := getAttrVal(n, "content"); content != "" {
 		return content
 	}
@@ -111,13 +113,13 @@ func getRDFaPropertyValue(n *html.Node) string {
 		return datetime
 	}
 	if href := getAttrVal(n, "href"); href != "" {
-		return href
+		return resolveURL(baseURL, href)
 	}
 	if src := getAttrVal(n, "src"); src != "" {
-		return src
+		return resolveURL(baseURL, src)
 	}
 	if resource := getAttrVal(n, "resource"); resource != "" {
-		return resource
+		return resolveURL(baseURL, resource)
 	}
 	return getTextContent(n)
 }

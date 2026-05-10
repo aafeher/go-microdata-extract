@@ -212,7 +212,7 @@ func TestGetRDFaPropertyValue_AllBranches(t *testing.T) {
 			if node == nil {
 				t.Fatal("could not find element node")
 			}
-			got := getRDFaPropertyValue(node)
+			got := getRDFaPropertyValue(node, "")
 			if got != tt.want {
 				t.Errorf("getRDFaPropertyValue() = %q; want %q", got, tt.want)
 			}
@@ -303,7 +303,7 @@ func TestParseRDFaPrefixes(t *testing.T) {
 }
 
 func TestParseRDFaFrom_ErrReader(t *testing.T) {
-	items, errs := parseRDFaFrom(errReader{})
+	items, errs := parseRDFaFrom("", errReader{})
 	if len(errs) == 0 {
 		t.Error("expected error from errReader")
 	}
@@ -327,5 +327,41 @@ func TestRDFa_VocabChangesInsideItem(t *testing.T) {
 	}
 	if len(items) == 0 {
 		t.Fatal("expected at least 1 item")
+	}
+}
+
+func TestRDFa_RelativeURLResolution(t *testing.T) {
+	const base = "http://example.com"
+	htmlStr := `<html><body vocab="http://schema.org/">
+		<div typeof="Article" resource="/article" about="/about">
+			<a property="url" href="/page">Page</a>
+			<img property="image" src="/img.jpg">
+			<div property="sameAs" resource="/same"></div>
+		</div>
+	</body></html>`
+
+	items, errs := RDFa(base, htmlStr)
+	if len(errs) != 0 {
+		t.Fatalf("unexpected errors: %v", errs)
+	}
+	if len(items) == 0 {
+		t.Fatal("expected at least 1 item")
+	}
+	item := items[0]
+
+	if item.Resource == nil || *item.Resource != "http://example.com/article" {
+		t.Errorf("Resource: %v", item.Resource)
+	}
+	if item.About == nil || *item.About != "http://example.com/about" {
+		t.Errorf("About: %v", item.About)
+	}
+	if v, _ := item.Properties["http://schema.org/url"].(string); v != "http://example.com/page" {
+		t.Errorf("url property: %q", v)
+	}
+	if v, _ := item.Properties["http://schema.org/image"].(string); v != "http://example.com/img.jpg" {
+		t.Errorf("image property: %q", v)
+	}
+	if v, _ := item.Properties["http://schema.org/sameAs"].(string); v != "http://example.com/same" {
+		t.Errorf("sameAs property: %q", v)
 	}
 }
