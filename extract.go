@@ -47,6 +47,7 @@ type (
 		userAgent    string
 		fetchTimeout uint8
 		httpClient   *http.Client
+		maxBodySize  int64
 	}
 
 	processor struct {
@@ -101,12 +102,15 @@ func New() *Extractor {
 	return e
 }
 
+const defaultMaxBodySize int64 = 10 * 1024 * 1024 // 10 MB
+
 // setConfigDefaults initializes the Extractor with default configuration settings.
 func (e *Extractor) setConfigDefaults() {
 	e.cfg = config{
 		syntaxes:     defaultSyntaxes,
 		userAgent:    "go-microdata-extract (+https://github.com/aafeher/go-microdata-extract/blob/main/README.md)",
 		fetchTimeout: 3,
+		maxBodySize:  defaultMaxBodySize,
 	}
 }
 
@@ -156,6 +160,15 @@ func (e *Extractor) SetFetchTimeout(fetchTimeout uint8) *Extractor {
 // Returns the updated Extractor instance.
 func (e *Extractor) SetHTTPClient(client *http.Client) *Extractor {
 	e.cfg.httpClient = client
+
+	return e
+}
+
+// SetMaxBodySize sets the maximum number of bytes read from an HTTP response body.
+// Responses larger than this limit are rejected with a FetchError. Default is 10 MB.
+// Returns the updated Extractor instance.
+func (e *Extractor) SetMaxBodySize(size int64) *Extractor {
+	e.cfg.maxBodySize = size
 
 	return e
 }
@@ -308,9 +321,12 @@ func (e *Extractor) fetch(ctx context.Context, url string) ([]byte, error) {
 		_ = Body.Close()
 	}(response.Body)
 
-	_, err = io.Copy(&body, response.Body)
+	_, err = io.Copy(&body, io.LimitReader(response.Body, e.cfg.maxBodySize+1))
 	if err != nil {
 		return nil, &FetchError{URL: url, Err: err}
+	}
+	if int64(body.Len()) > e.cfg.maxBodySize {
+		return nil, &FetchError{URL: url, Err: fmt.Errorf("response body exceeds limit of %d bytes", e.cfg.maxBodySize)}
 	}
 
 	return body.Bytes(), nil

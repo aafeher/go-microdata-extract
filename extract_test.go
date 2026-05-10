@@ -2365,6 +2365,7 @@ func TestExtractor_setContent(t *testing.T) {
 			setup: func() *Extractor {
 				return &Extractor{
 					url: fmt.Sprintf("%s/example", server.URL),
+					cfg: config{maxBodySize: defaultMaxBodySize},
 				}
 			},
 			attrURLContent: nil,
@@ -2407,7 +2408,7 @@ func TestExtractor_fetch(t *testing.T) {
 	server := testServer()
 	defer server.Close()
 
-	e := Extractor{cfg: config{fetchTimeout: 3}}
+	e := Extractor{cfg: config{fetchTimeout: 3, maxBodySize: defaultMaxBodySize}}
 	type fields struct {
 		cfg config
 	}
@@ -2443,7 +2444,7 @@ func TestExtractor_fetch(t *testing.T) {
 		},
 		{
 			name:    "Timeout URL",
-			fields:  fields{config{fetchTimeout: 0}},
+			fields:  fields{config{fetchTimeout: 0, maxBodySize: defaultMaxBodySize}},
 			url:     fmt.Sprintf("%s/test-01-opengraph-minimal.html", server.URL),
 			wantErr: false,
 		},
@@ -2785,5 +2786,55 @@ func TestExtractor_Extract_ContextCanceled(t *testing.T) {
 	var fe *FetchError
 	if !errors.As(err, &fe) {
 		t.Errorf("expected *FetchError, got %T: %v", err, err)
+	}
+}
+
+func TestExtractor_SetMaxBodySize(t *testing.T) {
+	e := New()
+	if e.cfg.maxBodySize != defaultMaxBodySize {
+		t.Fatalf("expected default maxBodySize %d, got %d", defaultMaxBodySize, e.cfg.maxBodySize)
+	}
+	e.SetMaxBodySize(1024)
+	if e.cfg.maxBodySize != 1024 {
+		t.Errorf("expected maxBodySize 1024, got %d", e.cfg.maxBodySize)
+	}
+}
+
+func TestExtractor_fetch_BodySizeLimitExceeded(t *testing.T) {
+	const limit int64 = 100
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(bytes.Repeat([]byte("x"), int(limit)+1))
+	}))
+	defer srv.Close()
+
+	e := New()
+	e.SetMaxBodySize(limit)
+	_, err := e.fetch(context.Background(), srv.URL)
+	if err == nil {
+		t.Fatal("expected error when body exceeds limit, got nil")
+	}
+	var fe *FetchError
+	if !errors.As(err, &fe) {
+		t.Errorf("expected *FetchError, got %T: %v", err, err)
+	}
+}
+
+func TestExtractor_fetch_BodySizeLimitNotExceeded(t *testing.T) {
+	const limit int64 = 100
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(bytes.Repeat([]byte("x"), int(limit)))
+	}))
+	defer srv.Close()
+
+	e := New()
+	e.SetMaxBodySize(limit)
+	body, err := e.fetch(context.Background(), srv.URL)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if int64(len(body)) != limit {
+		t.Errorf("expected %d bytes, got %d", limit, len(body))
 	}
 }

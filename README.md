@@ -55,6 +55,7 @@ e := extract.New()
 - userAgent: `"go-microdata-extract (+https://github.com/aafeher/go-microdata-extract/blob/main/README.md)"`
 - fetchTimeout: `3` seconds
 - httpClient: `nil` (a default `http.Client` is created from `fetchTimeout` on each request)
+- maxBodySize: `10485760` (10 MB — HTTP response bodies larger than this are rejected with a `FetchError`)
 
 ### Overwrite defaults
 
@@ -115,6 +116,20 @@ e := extract.New().SetHTTPClient(&http.Client{
 })
 ```
 
+#### Maximum body size
+
+To set the maximum number of bytes read from an HTTP response body, use `SetMaxBodySize()`.
+Responses larger than the limit are rejected with a `FetchError`. The default is 10 MB.
+
+```go
+e := extract.New()
+e = e.SetMaxBodySize(5 * 1024 * 1024) // 5 MB
+```
+... or ...
+```go
+e := extract.New().SetMaxBodySize(5 * 1024 * 1024)
+```
+
 #### Chaining methods
 
 In both cases, the functions return a pointer to the main object of the package, allowing you to chain these setting methods in a fluent interface style:
@@ -172,6 +187,18 @@ if err == nil {
         }
     }
 }
+```
+
+### Get results as JSON
+
+To retrieve all extracted metadata serialised as an indented JSON byte slice, use `GetExtractedJSON()`.
+
+```go
+em, err := extract.New().Extract(context.Background(), "https://example.com", nil)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println(string(em.GetExtractedJSON()))
 ```
 
 ## Performance
